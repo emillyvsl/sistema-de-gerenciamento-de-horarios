@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+{% block content %}
+<header>
+    <div class="p-4 ">
+        {% if data.hour < 12 %}
+            <p class="h4">Bom dia, {{ user }}! Que sua manhã seja produtiva!</p>
+        {% elif data.hour < 18 %}
+            <p class="h4">Boa tarde, {{ user }}! Espero que sua tarde esteja excelente!</p>
+        {% else %}
+            <p class="h4">Boa noite, {{ user }}! Que sua noite seja tranquila!</p>
+        {% endif %}
+    </div>
+</header>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-sm p-4 rounded card-custom">
+                <div class="icon-container">
+                    <svg class="icon" width="50" height="50" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <rect width="90" height="90" fill="url(#pattern0_414_346)"/>
+                        <defs>
+                            <pattern id="pattern0_414_346" patternContentUnits="objectBoundingBox" width="1" height="1">
+                                <use xlink:href="#image0_414_346" transform="scale(0.0111111)"/>
+                            </pattern>
+                            <image id="image0_414_346" width="90" height="90" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAABaCAYAAAA4qEECAAAACXBIWXMAAAsTAAALEwEAmpwYAAADSUlEQVR4nO2cPWsUURSGLxEUvzoLv0o/foKllRqwXnDvGQ2kSGWE+JW49yxTWFiIIEEwoIiNtjb+Agu1U7CxDYqlokZE5cyR6xoIYZPd7N6ZO3f3feB0y52dh5Mzc9/NjDEAAAAAAAAAMMqQ09PWyQPr5L1lWSEuNHZZlhXr5LVt6aXJWd1hUoZYj1snL2JLpV7SnbylXA+bFGm29aR18iW2RNqC7OQ6+38nJyOZVsvprEmJFMYFdetqllcmFbK2nootjAYX/c2kArE8jC2MhiiTCv4WLrYsGgfR5OR7bFk0FqJLEmCdLFuWxWZbz/i7muyK7jbjTHDBLB9tW2caDd0W+9xqReAuftbIdU/sc6olASXfzXOdiH0+tSVUJ+eQXK5o6+QDxkUlHa3TfR1n3KPXIbt5udfdBaLXEKJZFjeTjOg1UEdnTid7dDKi1xCizy/osY1EI3oNOKOnr+nebpIRvQYWbTYcG4heKxFtEb1W1NEO0WtFo6PQlMuUAUQXEE3o6CLs6HDyyzq9fi7Xg6H+Uv1alnXer43RwR3RXogpiX+yMaOLTke39EBZoqdy3Q/R3BEdcmSs50JLD0E0lz86yOkCRPOaiyHrPC6G2LAMDzYsBTYshA1LgawDo6NAqEQ1SOaQ3nF8wYhJGaK7Ersj0dEcXyJGB8cXjBnNoyzayR/LeiNr6wlq6VlyOmWdXiWW25blsWV5vuU1E6mKRevl4GtyGhXWcA8pzVz3hV6TEilTBpblU7eD+Z+ABl2TaiCrjqJvdT0gRkdYZnLd5R9eXy/aOvnpZQ/ywynVoCtr19Eey/Io5BeiGsiqpegm61HL8huii3JFe4i1DdFF+aL9A5nk5Mm4jw7r5KspG/8oG7Hc9LvCsRXNFb4+KMv1iGW5Y1nebfbwpRlB0VlbL5pUoBoIG6zkTSPX7SYVKFHJ/v/0TEpQdGl9ln/WxslLPy6S6uRVNjoxv9u0rHPD5CigH9Gsc2s/B0oSPYVOrn/0CiqKXkFF0SsIHL3Gqs67ReReY053mpRoDhi9xi7LsmRSgwaIXmOXdfIjuVfL5blOWJanseWNvOhBotfo5eS+SZmsz+g1Xsln/9az5C6GAAAAAAAAAGDW8RcfdgJL8GERuAAAAABJRU5ErkJggg=="/>
+                        </defs>
+                    </svg>
+                </div>
+                <h4 class="card-title">Professores Cadastrados</h4>
+                <h5 class="card-text">Total: 2 Professores</h5>
+            </div>
+        </div>
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-sm p-4 rounded card-custom">
+                <div class="icon-container">
+                    <svg class="icon" width="50" height="50" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <rect width="90" height="90" fill="url(#pattern0_414_336)"/>
+                        <defs>
+                            <pattern id="pattern0_414_336" patternContentUnits="objectBoundingBox" width="1" height="1">
+                                <use xlink:href="#image0_414_336" transform="scale(0.0111111)"/>
+                            </pattern>
+                            <image id="image0_414_336" width="90" height="90" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAABaCAYAAAA4qEECAAAACXBIWXMAAAsTAAALEwEAmpwYAAAD2ElEQVR4nO2czWsTQRTAx2+91KMfePET/BeUKthaBL0G60xKb71V8WK18+IeeumtKkK/POhfIPWuVj31KIoV9FDBnooViRUEX55M4rY122w22d3Zzvb9YGBJH9nJL69vdl6SFYJhGIZhGIZhGCbPFEt0UWqclho/SsCfZijAeQU4JTV1Zz0/5+m7TacU4CsFFQodGmevAZ3Mer5OIjWdU4DLTSWvDlxWJerMet4uZnILkit+Zn8renQi7Llbfs6shsZFpXG04NHu1ERHKhcNhgR8mQvRa8JHU1v4Yk+uRF05Er2YimgF+CiByU3mRjRUKBXR5hIu/uRwnkU3QWksJ5DRZRZtQbTU+EM4iHOlQ2r8IBzEtujp2KIBJ4SDWBZN3XFFFzVdEA5iVbRBAj6PsRDOCkexLrqo6ajSuJTGFnwzY1109aQl6jTiWpGsHG8qZSLaYFqfpncRQfILlzM5c9GrEyhRl9lWm8u26nW2xvK/40lXF75NKdo2yqMOBXjfbHyqbyrgRL9He1M/71YSrTT1SI1fWmlUJXburSBa1bJ4SgFWGqwDZSFoW6pzyLto1SiLA/0TFp1OFv8v+l7q88ljRqsIWVwbWFEaxwcGaFcuRZtVXgHdUIBzte9xtLklh/ZH9Y3Q1CMsYV208uiIAnybhVzlZ7EpKR51pPYisxZdy+TsJEvLWZyZ6Fq52DpZnKFonNtKWZyd6CQ+nIWIQ+OSBBzLMoszzOjEJP6Wmm71enRYOIKToiXQkHAMJ0WrYTokHMNJ0cJBWLQlWLQlWLQlWLQlWLQlWLQlWLQlWLQlciVaJbXztDikxu8K8GHhJu1j0WBBeJLf++aMroRl9orn0XYWDamXEBatbNRrjeNcOiBNybgsAR9YWwylxk/So2NXNR1XgJ/DYgUTZzHEkbU4HGHRMQivUTTox8lhus6iU8toKvpxUlMfi05L9DBd9uMk0BUWHYMweUVNZ/w4WaKzLDoGYfL6gE77ceaYRccgTF6/Rwf9OHPMomMQJu/SIO3x48wxi45ByGZlJRiLv3jDkrRowK+BWHPLMt4ZJi76XSBW43sWnXzpeB2MxTcsOnnRM8FYfMaiky8dj+tjpcYnLDp50WP1seZHliy6TUI6d3frYyX88Vh0m0RpkUZplQqmTdHrWqRRWqWCaVP0uhZplFapYNoTbdqiAdEhrVLBNBONC0FxWOm9QwfqY81jG98CAhfYcxOkJthgs/K0cTzObFDPNYtuwnmPdtZk40L1JoMaJwtDtL9RvPmbMr/hrt6Q0Pw3kC4UaAeLZhiGYRiGYRiGEZuDv48ibOLkNwAZAAAAAElFTkSuQmCC"/>
+                        </defs>
+                    </svg>
+                </div>
+                <h4 class="card-title">Disciplinas Cadastradas</h4>
+                <h5 class="card-text">Total: 15 Disciplinas</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

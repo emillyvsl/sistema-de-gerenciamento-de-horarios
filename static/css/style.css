@@ -1,0 +1,78 @@
+/* body {
+    background-color: #E7EFF8;
+} */
+
+.card-login {
+    background-color: #E7EFF8;
+}
+
+.body-login {
+    background-color: #ffffff;
+}
+
+
+.header {
+    background-color: #B0C6DC;
+    padding: 15px;
+}
+
+.header a {
+    color: black;
+    margin-right: 15px;
+    text-decoration: none;
+
+
+}
+.header a:hover {
+    color: #007bff;
+    border-bottom: 2px solid #007bff; /* Adicionar uma borda inferior */
+
+}
+
+.card-custom {
+    background-color: #5B7CFE;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 10px;
+}
+
+.footer {
+    background-color: #B0C6DC;
+    text-align: center;
+    padding: 10px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+.icon-container {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0; /* Cor de fundo do círculo */
+    border-radius: 50%;
+    margin-bottom: 20px; /* Espaço abaixo do ícone */
+}
+
+.icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+/* CSS para o navbar */
+nav a {
+    padding: 10px;
+    text-decoration: none;
+    color: #000; /* Cor padrão dos links */
+}
+
+nav a.active {
+    color: #007bff; /* Cor para o link ativo */
+    font-weight: bold; /* Opicional: deixar o texto em negrito */
+    border-bottom: 2px solid #007bff; /* Adicionar uma borda inferior */
+}

@@ -1,7 +1,13 @@
+from django.utils import timezone
+from django.utils.timezone import localtime
+from django.contrib import messages
+from django.contrib.auth import logout
+
 from sqlite3 import IntegrityError
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login as auth_login
 
 def registro(request):
     if request.method == 'GET':
@@ -25,4 +31,35 @@ def registro(request):
 
 
 def login(request):
-    return render(request, 'auth/login.html')
+    if request.method == 'GET':
+        return render(request, 'auth/login.html')
+    else:
+        email = request.POST['email']
+        password = request.POST['senha']
+
+        try:
+            user = User.objects.get(email=email)
+            if user.check_password(password):
+                auth_login(request, user)  # Autentica e loga o usuário
+                return redirect('index')   # Redireciona para a view index
+            else:
+                return HttpResponse("Senha incorreta.")
+        except User.DoesNotExist:
+            return HttpResponse("Usuário não encontrado.")
+
+def index(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    else:
+        user = request.user.username
+        data = timezone.now()
+        data = localtime(data)  # Converter para o fuso horário configurado
+        messages.success(request, 'Seu formulário foi enviado com sucesso!')
+
+
+    return render(request, 'index.html', {'user': user, 'data': data})
+
+def user_logout(request):
+    if request.user.is_authenticated:
+        logout(request)
+    return redirect('login')
