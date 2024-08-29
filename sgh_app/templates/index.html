@@ -6,12 +6,15 @@
 <header>
     <div class="p-4 ">
         {% if data.hour < 12 %}
-            <p class="h4">Bom dia, {{ user }}! Que sua manhã seja produtiva!</p>
+            <p class="h4">Bom dia, {{ nome_coordenacao }}! Que sua manhã seja produtiva!</p>
         {% elif data.hour < 18 %}
-            <p class="h4">Boa tarde, {{ user }}! Espero que sua tarde esteja excelente!</p>
+            <p class="h4">Boa tarde, {{ nome_coordenacao }}! Espero que sua tarde esteja excelente!</p>
         {% else %}
-            <p class="h4">Boa noite, {{ user }}! Que sua noite seja tranquila!</p>
+            <p class="h4">Boa noite, {{ nome_coordenacao }}! Que sua noite seja tranquila!</p>
         {% endif %}
+        <p class="h4">Curso: {{ curso }}</p>
+        <p class="h4">Centro: {{ centro }}</p>
+       
     </div>
 </header>
 <div class="container mt-5">
