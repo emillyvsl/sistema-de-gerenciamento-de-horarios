@@ -1,11 +1,12 @@
 from django.urls import path
-from . import views
+from .views.auth_views import login, user_logout, registro
+from .views.professor_views import listar_professores
+from .views.index_views import index  # Se você criar um arquivo separado para a view `index`
 
 urlpatterns = [
-    path('', views.login, name='login'), 
-    path('registro/', views.registro, name='registro'),
-    path('index/', views.index, name='index'),
-    path('logout/', views.user_logout, name='logout'),
-    path('professores/', views.listar_professores, name='listar_professores'),
-
+    path('', login, name='login'), 
+    path('registro/', registro, name='registro'),
+    path('index/', index, name='index'),
+    path('logout/', user_logout, name='logout'),
+    path('professores/', listar_professores, name='listar_professores'),
 ]
