@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import Centro, Curso, Coordenacao
 
+
 class CursoAdmin(admin.ModelAdmin):
     list_display = ('nome', 'centro', 'quantidade_periodos')
     search_fields = ('nome',)

@@ -10,6 +10,12 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.decorators import login_required 
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_protect
+
+from sgh_app.forms import ProfessorForm
+from sgh_app.models.coordenacao import Coordenacao
+from sgh_app.models.curso import Curso
+from sgh_app.models.professor import Professor
 
 
 
@@ -32,8 +38,7 @@ def registro(request):
                 return HttpResponse("Usuário registrado com sucesso!")
             except IntegrityError:
                 return HttpResponse("Erro ao registrar o usuário.")
-
-@csrf_exempt
+@csrf_protect
 def login(request):
     if request.method == 'GET':
         return render(request, 'auth/login.html')
@@ -88,3 +93,39 @@ def user_logout(request):
         logout(request)  # Realiza o logout
     # Redireciona o usuário para a página de login após o logout
     return redirect('login')
+
+
+
+@login_required
+def listar_professores(request):
+    try:
+        # Obtém a coordenação associada ao usuário logado
+        coordenacao = request.user.coordenacao
+        curso = coordenacao.curso
+
+        # Filtra os professores com base no curso da coordenação
+        professores = Professor.objects.filter(curso=curso)
+        cursos = Curso.objects.filter(id=curso.id)  # Obtém apenas o curso do usuário logado
+
+        if request.method == 'POST':
+            form = ProfessorForm(request.POST)
+            if form.is_valid():
+                professor = form.save(commit=False)
+                professor.curso = curso  # Define o curso do professor como o curso da coordenação
+                professor.save()
+                messages.success(request, 'Professor cadastrado com sucesso!')
+                return redirect('listar_professores')
+        else:
+            form = ProfessorForm()
+
+        context = {
+            'professores': professores,
+            'form': form,
+            'cursos': cursos
+        }
+
+        return render(request, 'professor.html', context)
+
+    except Coordenacao.DoesNotExist:
+        messages.error(request, 'Você não está associado a uma coordenação de curso.')
+        return redirect('logout')
