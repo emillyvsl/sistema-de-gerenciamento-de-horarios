@@ -42,7 +42,8 @@ def listar_professores(request):
         context = {
             'professores': professores,
             'form': form,
-            'centros': centros  # Lista de centros para escolha
+            'centros': centros,  # Lista de centros para escolha
+            'curso': curso,
         }
 
         return render(request, 'professor.html', context)
