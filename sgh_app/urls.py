@@ -9,4 +9,5 @@ urlpatterns = [
     path('index/', index, name='index'),
     path('logout/', user_logout, name='logout'),
     path('professores/', listar_professores, name='listar_professores'),
+   
 ]
