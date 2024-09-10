@@ -14,7 +14,7 @@
             <tr>
                 <th>Nome</th>
                 <th>Centro</th>
-                <th>Ações</th> <!-- Coluna de Ações -->
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -25,10 +25,30 @@
                 <td>
                     <!-- Botão Editar -->
                     <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarModal" data-id="{{ professor.id }}" data-nome="{{ professor.nome }}" data-centro="{{ professor.centro.id }}">Editar</button>
-                    <!-- Botão Excluir -->
-                    <button type="button" class="btn btn-danger" data-id="{{ professor.id }}" data-bs-toggle="modal" data-bs-target="#confirmarExclusaoModal">
-                        Excluir
-                    </button>
+
+                    <!-- Botão Excluir e Modal -->
+                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#excluirModal{{ professor.id }}">Excluir</button>
+
+                    <!-- Modal de Exclusão -->
+                    <div class="modal fade" id="excluirModal{{ professor.id }}" tabindex="-1" aria-labelledby="excluirModalLabel{{ professor.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="excluirModalLabel{{ professor.id }}">Confirmar Exclusão</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Você tem certeza de que deseja excluir {{ professor.nome }}?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                    <button type="button" class="btn btn-danger" onclick="excluirProfessor({{ professor.id }})">Confirmar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </td>
             </tr>
             {% empty %}
@@ -71,6 +91,41 @@
             </div>
         </div>
     </div>
+ 
+
+    <script>
+        // Função para excluir um professor
+        function excluirProfessor(professorId) {
+            $.ajax({
+                // Define o método HTTP da requisição como POST
+                type: 'POST',
+                // Define a URL da requisição, substituindo '0' pelo ID do professor
+                url: '{% url "excluir_professor" 0 %}'.replace('0', professorId),
+                // Define os dados que serão enviados com a requisição, incluindo o token CSRF para segurança
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                // Função que é chamada se a requisição for bem-sucedida
+                success: function (response) {
+                    // Verifica se a resposta indica sucesso
+                    if (response.success) {
+                        // Recarrega a página para atualizar a lista de professores
+                        location.reload();
+                    } else {
+                        // Exibe um alerta com a mensagem de erro retornada
+                        alert('Erro: ' + response.error);
+                    }
+                },
+                // Função que é chamada se ocorrer um erro durante a requisição
+                error: function (response) {
+                    // Exibe um alerta com uma mensagem genérica de erro
+                    alert('Ocorreu um erro ao excluir o professor.');
+                }
+            });
+        }
+    </script>
+    
+    
 
     
 

@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
@@ -52,3 +52,36 @@ def listar_professores(request):
         return redirect('logout')
     
 
+
+@login_required
+def excluir_professor(request, professor_id):
+    # Verifica se o método da requisição é POST
+    if request.method == 'POST':
+        # Tenta obter o objeto Professor com o ID fornecido. Se não encontrar, retorna um erro 404.
+        professor = get_object_or_404(Professor, id=professor_id)
+        try:
+            # Tenta excluir o objeto Professor do banco de dados
+            professor.delete()
+            # Adiciona uma mensagem de sucesso à sessão
+            messages.success(request, 'Professor excluído com sucesso!')
+            
+            # Verifica se a requisição foi feita via AJAX
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                # Retorna uma resposta JSON indicando sucesso
+                return JsonResponse({'success': True})
+            
+            # Redireciona para a página de listagem de professores
+            return redirect('listar_professores')
+        except Exception as e:
+            # Se houver um erro ao tentar excluir o professor
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                # Retorna uma resposta JSON indicando falha e a mensagem de erro
+                return JsonResponse({'success': False, 'error': str(e)})
+            
+            # Redireciona para a página de listagem de professores
+            return redirect('listar_professores')
+    else:
+        # Se o método da requisição não for POST
+        messages.error(request, 'Método inválido.')
+        # Redireciona para a página de listagem de professores
+        return redirect('listar_professores')
