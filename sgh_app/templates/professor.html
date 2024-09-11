@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block title %}Listagem de Professores{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <h2 class="mb-4">Professores do curso de {{ curso.nome }}</h2>
@@ -23,12 +25,16 @@
                 <td>{{ professor.nome }}</td>
                 <td>{{ professor.centro.nome }}</td>
                 <td>
-                    <!-- Botão Editar -->
-                    <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarModal" data-id="{{ professor.id }}" data-nome="{{ professor.nome }}" data-centro="{{ professor.centro.id }}">Editar</button>
+                    <!-- Botão para abrir o modal -->
+                    <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editarProfessorModal"
+                    data-id="{{ professor.id }}" data-nome="{{ professor.nome }}" data-centro="{{ professor.centro_id }}">
+                    Editar
+                    </button>
 
                     <!-- Botão Excluir e Modal -->
-                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#excluirModal{{ professor.id }}">Excluir</button>
-
+                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#excluirModal{{ professor.id }}">
+                    Excluir
+                    </button>
                     <!-- Modal de Exclusão -->
                     <div class="modal fade" id="excluirModal{{ professor.id }}" tabindex="-1" aria-labelledby="excluirModalLabel{{ professor.id }}" aria-hidden="true">
                         <div class="modal-dialog">
@@ -49,6 +55,40 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Modal de Edição -->
+                    <div class="modal fade" id="editarProfessorModal" tabindex="-1" role="dialog" aria-labelledby="editarProfessorModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editarProfessorModalLabel">Editar Professor</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="form-editar-professor" method="post">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <label for="id_nome">Nome:</label>
+                                            <input type="text" class="form-control" id="id_nome" name="nome" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="id_centro">Centro:</label>
+                                            <select class="form-control" id="id_centro" name="centro" required>
+                                                {% for centro in centros %}
+                                                    <option value="{{ centro.id }}">{{ centro.nome }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <input type="hidden" id="id_professor" name="professor_id">
+                                        <button type="submit" class="btn btn-primary">Salvar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </td>
             </tr>
             {% empty %}
@@ -91,42 +131,13 @@
             </div>
         </div>
     </div>
- 
 
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/script.js' %}"></script>
     <script>
-        // Função para excluir um professor
-        function excluirProfessor(professorId) {
-            $.ajax({
-                // Define o método HTTP da requisição como POST
-                type: 'POST',
-                // Define a URL da requisição, substituindo '0' pelo ID do professor
-                url: '{% url "excluir_professor" 0 %}'.replace('0', professorId),
-                // Define os dados que serão enviados com a requisição, incluindo o token CSRF para segurança
-                data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}'
-                },
-                // Função que é chamada se a requisição for bem-sucedida
-                success: function (response) {
-                    // Verifica se a resposta indica sucesso
-                    if (response.success) {
-                        // Recarrega a página para atualizar a lista de professores
-                        location.reload();
-                    } else {
-                        // Exibe um alerta com a mensagem de erro retornada
-                        alert('Erro: ' + response.error);
-                    }
-                },
-                // Função que é chamada se ocorrer um erro durante a requisição
-                error: function (response) {
-                    // Exibe um alerta com uma mensagem genérica de erro
-                    alert('Ocorreu um erro ao excluir o professor.');
-                }
-            });
-        }
+        var baseEditarProfessorUrl = "{% url 'editar_professor' professor_id=0 %}"; // URL base com ID fictício
+        var baseExcluirProfessorUrl = "{% url 'excluir_professor' 0 %}";
     </script>
-    
-    
-
-    
-
 {% endblock %}

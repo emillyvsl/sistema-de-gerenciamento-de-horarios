@@ -17,6 +17,8 @@ from sgh_app.models.professor import Professor
 from sgh_app.models.centro import Centro
 from sgh_app.forms import ProfessorForm
 
+
+
 @login_required
 def listar_professores(request):
     try:
@@ -86,3 +88,34 @@ def excluir_professor(request, professor_id):
         messages.error(request, 'Método inválido.')
         # Redireciona para a página de listagem de professores
         return redirect('listar_professores')
+    
+@login_required
+def editar_professor(request, professor_id):
+    professor = get_object_or_404(Professor, id=professor_id)
+
+    if request.method == 'POST':
+        form = ProfessorForm(request.POST, instance=professor)
+        if form.is_valid():
+            form.save()
+            # Adiciona uma mensagem de sucesso à sessão
+            messages.success(request, 'Professor(a) editado com sucesso!')
+            
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                # Retorna uma resposta JSON indicando sucesso
+                return JsonResponse({'success': True})
+            return redirect('listar_professores')
+        else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                # Retorna uma resposta JSON indicando falha e os erros do formulário
+                return JsonResponse({'success': False, 'errors': form.errors})
+            return redirect('listar_professores')
+    else:
+        # Se o método da requisição não for POST
+        messages.error(request, 'Método inválido.')
+        # Redireciona para a página de listagem de professores
+        return redirect('listar_professores')
+    
+   
+
+
+

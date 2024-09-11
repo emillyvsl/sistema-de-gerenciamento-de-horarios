@@ -5,6 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{% csrf_token %}">
+
     <title>{% block title %}Meu Projeto{% endblock %}</title>
     
     <!-- Bootstrap CSS via CDN -->
@@ -33,37 +35,26 @@
 
     {% block content %}
     {% endblock %}
-
-    <!-- jQuery completo -->
+    
+   <!-- jQuery completo -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        console.log("jQuery versão:", $.fn.jquery); // Deve mostrar a versão do jQuery
+    </script>
     <!-- Bootstrap JS via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-    <script src="{% static 'js/script.js' %}"></script>
-
     <!-- JavaScript do SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
-    {% include 'components/footer.html' %}
 
-    <!-- Script para remoção automática de mensagens -->
-    <script>
-        $(document).ready(function() {
-            // Definindo o tempo que as mensagens devem permanecer visíveis (em milissegundos)
-            var mensagemTimeout = 5000; // 5 segundos
 
-            // Seleciona todas as mensagens com a classe 'message-auto-hide'
-            $('.message-auto-hide').each(function() {
-                var $this = $(this);
-                
-                // Define um timeout para remover a mensagem após o período definido
-                setTimeout(function() {
-                    $this.alert('close');
-                }, mensagemTimeout);
-            });
-        });
-    </script>
+    {% block extra_js %}
+    <script src="{% static 'js/script.js' %}"></script>
+    {% endblock %}
 
+
+{% include 'components/footer.html' %}
+    
 </body>
 </html>
