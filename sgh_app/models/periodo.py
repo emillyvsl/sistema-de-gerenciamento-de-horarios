@@ -7,3 +7,6 @@ class Periodo(models.Model):
 
     def __str__(self):
         return self.tipo_periodo.nome
+    
+    def get_nome_periodo(self):
+        return self.tipo_periodo.nome

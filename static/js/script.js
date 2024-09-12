@@ -102,3 +102,82 @@ $(document).ready(function() { // Espera até que o DOM esteja completamente car
         $('.alert').fadeOut('slow'); // Faz com que as mensagens de alerta desapareçam lentamente após 5 segundos.
     }, mensagemTimeout);
 });
+
+// Função para excluir disciplina
+window.excluirDisciplina = function(disciplinaId) {
+    console.log("Função excluirDisciplina chamada com ID:", disciplinaId); // Imprime no console o ID da disciplina que será excluída.
+
+    $.ajax({
+        type: 'POST', // Define o método HTTP como POST.
+        url: baseExcluirDisciplinaUrl.replace('0', disciplinaId), // Substitui '0' na URL base pela ID da disciplina para a solicitação.
+        data: {
+            csrfmiddlewaretoken: getCookie('csrftoken') // Inclui o token CSRF obtido através da função `getCookie` nos dados da solicitação.
+        },
+        success: function(response) {
+            console.log("Resposta de sucesso recebida:", response); // Imprime a resposta da solicitação bem-sucedida no console.
+            if (response.success) {
+                location.reload(); // Recarrega a página se a exclusão for bem-sucedida.
+            } else {
+                alert('Erro: ' + response.error); // Exibe um alerta com a mensagem de erro se a exclusão falhar.
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Erro ao excluir a disciplina:', status, error); // Imprime detalhes do erro no console.
+            alert('Ocorreu um erro ao excluir a disciplina.'); // Exibe um alerta se ocorrer um erro durante a exclusão.
+        }
+    });
+};
+
+$(document).ready(function() {
+    // Verifica o conteúdo do select na carga inicial
+    console.log("Conteúdo do select Período na carga inicial:", $('#id_periodo').html());
+
+    $('#editarDisciplinaModal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget);
+        var disciplinaId = button.data('id');
+        var disciplinaNome = button.data('nome');
+        var periodoId = button.data('periodo'); // ID do período
+
+        console.log("ID da Disciplina:", disciplinaId);
+        console.log("Nome da Disciplina:", disciplinaNome);
+        console.log("ID do Período:", periodoId);
+
+        var modal = $(this);
+        modal.find('#id_nome').val(disciplinaNome);
+
+        // Verifica o conteúdo do select Período
+        var selectPeriodo = modal.find('#id_periodo');
+        console.log("Select Período:", selectPeriodo);
+        console.log("Conteúdo do select Período ao abrir o modal:", selectPeriodo.html());
+        console.log("Valores das opções no select:", selectPeriodo.find('option').map(function() { return $(this).val(); }).get());
+
+        // Atribuir o valor do período
+        selectPeriodo.val(periodoId);
+
+        modal.find('#id_disciplina').val(disciplinaId);
+    });
+
+    $('#form-editar-disciplina').on('submit', function(e) {
+        e.preventDefault();
+
+        var disciplinaId = $('#id_disciplina').val();
+        var editarUrl = baseEditarDisciplinaUrl.replace('0', disciplinaId);
+
+        $.ajax({
+            type: 'POST',
+            url: editarUrl,
+            data: $(this).serialize(),
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert('Erro: ' + response.error);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Ocorreu um erro ao editar a disciplina.');
+            }
+        });
+    });
+});
+

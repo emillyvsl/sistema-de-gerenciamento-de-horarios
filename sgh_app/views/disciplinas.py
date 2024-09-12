@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from sgh_app.models.coordenacao import Coordenacao
@@ -37,3 +38,59 @@ def listar_disciplinas(request):
     except Coordenacao.DoesNotExist:
         messages.error(request, 'Você não está associado a uma coordenação de curso.')
         return redirect('logout')
+    
+
+def editar_disciplina(request, disciplina_id):
+    disciplina = get_object_or_404(Disciplina, id=disciplina_id)
+    periodos = Periodo.objects.all()  # Obtém todos os períodos
+
+    if request.method == 'POST':
+        form = DisciplinaForm(request.POST, instance=disciplina)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Disciplina editada com sucesso!')
+            return redirect('listar_disciplinas')
+        else:
+            messages.error(request, 'Erro ao editar disciplina.')
+    else:
+        form = DisciplinaForm(instance=disciplina)
+    
+    return render(request, 'editar_disciplina.html', {
+        'form': form,
+        'disciplina': disciplina,
+        'periodos': periodos
+    })
+
+
+@login_required
+def excluir_disciplina(request, disciplina_id):
+    # Verifica se o método da requisição é POST
+    if request.method == 'POST':
+        # Tenta obter o objeto Disciplina com o ID fornecido. Se não encontrar, retorna um erro 404.
+        disciplina = get_object_or_404(Disciplina, id=disciplina_id)
+        try:
+            # Tenta excluir o objeto Disciplina do banco de dados
+            disciplina.delete()
+            # Adiciona uma mensagem de sucesso à sessão
+            messages.success(request, 'Disciplina excluída com sucesso!')
+            
+            # Verifica se a requisição foi feita via AJAX
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                # Retorna uma resposta JSON indicando sucesso
+                return JsonResponse({'success': True})
+            
+            # Redireciona para a página de listagem de disciplinas
+            return redirect('listar_disciplinas')
+        except Exception as e:
+            # Se houver um erro ao tentar excluir a disciplina
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                # Retorna uma resposta JSON indicando falha e a mensagem de erro
+                return JsonResponse({'success': False, 'error': str(e)})
+            
+            # Redireciona para a página de listagem de disciplinas
+            return redirect('listar_disciplinas')
+    else:
+        # Se o método da requisição não for POST
+        messages.error(request, 'Método inválido.')
+        # Redireciona para a página de listagem de disciplinas
+        return redirect('listar_disciplinas')

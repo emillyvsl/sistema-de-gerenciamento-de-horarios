@@ -1,56 +1,145 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Disciplinas{% endblock %}
-
+{% block title %}Listagem de Disciplinas{% endblock %}
 {% block content %}
-<div class="container mt-4">
-    <h1>Disciplinas do curso de {{ request.user.coordenacao.curso.nome }}</h1>
+<div class="container mt-5">
+    <h2 class="mb-4">Disciplinas do curso de {{ curso.nome }}</h2>
 
-    <!-- Botão para abrir o modal de cadastro de disciplina -->
-    <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#cadastrarDisciplinaModal">
-        Cadastrar Nova Disciplina
-    </button>
+    <!-- Botão para abrir o modal de cadastro -->
+    <button class="btn btn-primary mb-4" data-toggle="modal" data-target="#cadastroModal">Cadastrar Disciplina</button>
 
     <!-- Tabela de disciplinas -->
     <table class="table table-striped">
         <thead>
             <tr>
                 <th>Nome</th>
-                <th>Período</th> <!-- Nova coluna para o período -->
+                <th>Período</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
             {% for disciplina in disciplinas %}
             <tr>
                 <td>{{ disciplina.nome }}</td>
-                <td>{{ disciplina.periodo.tipo_periodo.nome }}</td> <!-- Exibe o nome do tipo de período -->
+                <td>{{ disciplina.periodo }}</td>
+                <td>
+                    <button 
+                    type="button" 
+                    class="btn btn-primary" 
+                    data-toggle="modal" 
+                    data-target="#editarDisciplinaModal"
+                    data-id="{{ disciplina.id }}"
+                    data-nome="{{ disciplina.nome }}"
+                    data-periodo="{{ disciplina.periodo.id }}">
+                    Editar
+                    </button>
+                
+
+                    <!-- Botão Excluir e Modal -->
+                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#excluirModal{{ disciplina.id }}">
+                    Excluir
+                    </button>
+                    <!-- Modal de Exclusão -->
+                    <div class="modal fade" id="excluirModal{{ disciplina.id }}" tabindex="-1" aria-labelledby="excluirModalLabel{{ disciplina.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="excluirModalLabel{{ disciplina.id }}">Confirmar Exclusão</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Você tem certeza de que deseja excluir {{ disciplina.nome }}?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                    <button type="button" class="btn btn-danger" onclick="excluirDisciplina({{ disciplina.id }})">Confirmar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal de Edição -->
+                <div class="modal fade" id="editarDisciplinaModal" tabindex="-1" role="dialog" aria-labelledby="editarDisciplinaModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editarDisciplinaModalLabel">Editar Disciplina</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="form-editar-disciplina" method="post">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="id_nome">Nome:</label>
+                                        <input type="text" class="form-control" id="id_nome" name="nome" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="id_periodo">Período:</label>
+                                        <select class="form-control" id="id_periodo" name="periodo" required>
+                                            {% for periodo in periodos %}
+                                                <option value="{{ periodo.id }}">{{ periodo.nome }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <input type="hidden" id="id_disciplina" name="disciplina_id">
+                                    <button type="submit" class="btn btn-primary">Salvar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    
+
+
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">Nenhuma disciplina cadastrada.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-</div>
 
-<!-- Modal de cadastro de nova disciplina -->
-<div class="modal fade" id="cadastrarDisciplinaModal" tabindex="-1" role="dialog" aria-labelledby="cadastrarDisciplinaLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="cadastrarDisciplinaLabel">Cadastrar Nova Disciplina</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form method="POST" action="{% url 'listar_disciplinas' %}">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary">Salvar</button>
-                </form>
-
-
-
+    <!-- Modal de Cadastro -->
+    <div class="modal fade" id="cadastroModal" tabindex="-1" role="dialog" aria-labelledby="cadastroModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cadastroModalLabel">Cadastrar Disciplina</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{% url 'listar_disciplinas' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="id_nome">Nome</label>
+                            <input type="text" class="form-control" id="id_nome" name="nome" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_periodo">Período</label>
+                            <input type="text" class="form-control" id="id_periodo" name="periodo" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Salvar</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/script.js' %}"></script>
+    <script>
+        var baseEditarDisciplinaUrl = "{% url 'editar_disciplina' disciplina_id=0 %}"; // URL base com ID fictício
+        var baseExcluirDisciplinaUrl = "{% url 'excluir_disciplina' 0 %}";
+    </script>
 {% endblock %}

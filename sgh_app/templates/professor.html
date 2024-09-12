@@ -14,7 +14,7 @@
         <thead>
             <tr>
                 <th>Nome</th>
-                <th>Curso</th>
+                <th>Centro</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -55,38 +55,39 @@
                         </div>
                     </div>
 
-                    <!-- Modal de Edição -->
-                    <div class="modal fade" id="editarProfessorModal" tabindex="-1" role="dialog" aria-labelledby="editarProfessorModalLabel" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="editarProfessorModalLabel">Editar Professor</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <form id="form-editar-professor" method="post">
-                                        {% csrf_token %}
-                                        <div class="form-group">
-                                            <label for="id_nome">Nome:</label>
-                                            <input type="text" class="form-control" id="id_nome" name="nome" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="id_centro">Centro:</label>
-                                            <select class="form-control" id="id_centro" name="centro" required>
-                                                {% for centro in centros %}
-                                                    <option value="{{ centro.id }}">{{ centro.nome }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                        <input type="hidden" id="id_professor" name="professor_id">
-                                        <button type="submit" class="btn btn-primary">Salvar</button>
-                                    </form>
-                                </div>
+
+                <!-- Modal de Edição -->
+                <div class="modal fade" id="editarProfessorModal" tabindex="-1" role="dialog" aria-labelledby="editarProfessorModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editarProfessorModalLabel">Editar Professor</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="form-editar-professor" method="post">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="id_nome">Nome:</label>
+                                        <input type="text" class="form-control" id="id_nome" name="nome" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="id_centro">Centro:</label>
+                                        <select class="form-control" id="id_centro" name="centro" required>
+                                            {% for centro in centros %}
+                                                <option value="{{ centro.id }}">{{ centro.nome }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <input type="hidden" id="id_professor" name="professor_id">
+                                    <button type="submit" class="btn btn-primary">Salvar</button>
+                                </form>
                             </div>
                         </div>
                     </div>
+                </div>
 
                 </td>
             </tr>
@@ -119,8 +120,8 @@
                             <label for="id_centro">Centro</label>
                             <select class="form-control" id="id_centro" name="centro" required>
                                 <option value="">Selecione um centro</option>
-                                {% for centro in centros %}
-                                    <option value="{{ centro.id }}">{{ centro.nome }}</option>
+                                    {% for centro in centros %}
+                                <option value="{{ centro.id }}">{{ centro.nome }}</option>
                                 {% endfor %}
                             </select>
                         </div>
