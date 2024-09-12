@@ -9,15 +9,11 @@ from sgh_app.forms import DisciplinaForm
 @login_required
 def listar_disciplinas(request):
     try:
-        # Obtém a coordenação associada ao usuário logado
         coordenacao = request.user.coordenacao
         curso = coordenacao.curso  # Curso associado ao usuário logado
 
         # Filtra as disciplinas com base no curso da coordenação
         disciplinas = Disciplina.objects.filter(curso=curso)
-
-        # Obtém todos os períodos do curso, independente de ter disciplinas associadas
-        periodos = Periodo.objects.filter(tipo_periodo__periodos__disciplinas__curso=curso).distinct()
 
         if request.method == 'POST':
             form = DisciplinaForm(request.POST)
@@ -28,9 +24,7 @@ def listar_disciplinas(request):
                 messages.success(request, 'Disciplina cadastrada com sucesso!')
                 return redirect('listar_disciplinas')
         else:
-            # Filtra os períodos pelo curso do usuário logado
             form = DisciplinaForm()
-            form.fields['periodo'].queryset = Periodo.objects.filter(tipo_periodo__periodos__disciplinas__curso=curso).distinct()
 
         context = {
             'disciplinas': disciplinas,
@@ -43,4 +37,3 @@ def listar_disciplinas(request):
     except Coordenacao.DoesNotExist:
         messages.error(request, 'Você não está associado a uma coordenação de curso.')
         return redirect('logout')
-

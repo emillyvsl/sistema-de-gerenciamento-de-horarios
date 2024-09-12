@@ -6,4 +6,4 @@ class Periodo(models.Model):
     tipo_periodo = models.OneToOneField(TipoPeriodo, on_delete=models.CASCADE, related_name='periodos')
 
     def __str__(self):
-        return f"Período: {self.tipo_periodo.nome}"
+        return self.tipo_periodo.nome
