@@ -1,3 +1,4 @@
+
 {% load static %}
 
 <!DOCTYPE html>
@@ -5,19 +6,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{% csrf_token %}">
-
     <title>{% block title %}Meu Projeto{% endblock %}</title>
-    
+
     <!-- Bootstrap CSS via CDN -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Importando o CSS -->
+    <!-- Importando 0o css-->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <!-- Inclua o CSS do SweetAlert2 -->
+    <!-- Inclua o CSS do SweetAlert2 no <head> do seu template -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+
+
+
 </head>
 <body>
-    {% include 'components/navbar.html' %}
+
+    {% include 'components/navbar.html' %}    
 
     <!-- Bloco de mensagens -->
     {% if messages %}
@@ -33,10 +37,12 @@
         </div>
     {% endif %}
 
+
     {% block content %}
+    <!-- O conteúdo das outras páginas será inserido aqui -->
+
     {% endblock %}
-    
-   <!-- jQuery completo -->
+
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
         console.log("jQuery versão:", $.fn.jquery); // Deve mostrar a versão do jQuery
@@ -44,17 +50,12 @@
     <!-- Bootstrap JS via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <!-- JavaScript do SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-
-
-
+ 
     {% block extra_js %}
     <script src="{% static 'js/script.js' %}"></script>
     {% endblock %}
 
+    {% include 'components/footer.html' %}
 
-{% include 'components/footer.html' %}
-    
 </body>
 </html>
