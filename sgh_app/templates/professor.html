@@ -1,8 +1,7 @@
+
 {% extends 'base.html' %}
 {% load static %}
-
 {% block title %}Listagem de Professores{% endblock %}
-
 {% block content %}
 <div class="container mt-5">
     <h2 class="mb-4">Professores do curso de {{ curso.nome }}</h2>
@@ -15,7 +14,7 @@
         <thead>
             <tr>
                 <th>Nome</th>
-                <th>Centro</th>
+                <th>Curso</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -131,7 +130,7 @@
             </div>
         </div>
     </div>
-
+</div>
 {% endblock %}
 
 {% block extra_js %}
