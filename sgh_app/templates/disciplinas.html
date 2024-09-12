@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Disciplinas{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Disciplinas do curso de {{ request.user.coordenacao.curso.nome }}</h1>
+
+    <!-- Botão para abrir o modal de cadastro de disciplina -->
+    <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#cadastrarDisciplinaModal">
+        Cadastrar Nova Disciplina
+    </button>
+
+    <!-- Tabela de disciplinas -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Período</th> <!-- Nova coluna para o período -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for disciplina in disciplinas %}
+            <tr>
+                <td>{{ disciplina.nome }}</td>
+                <td>{{ disciplina.periodo.tipo_periodo.nome }}</td> <!-- Exibe o nome do tipo de período -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal de cadastro de nova disciplina -->
+<div class="modal fade" id="cadastrarDisciplinaModal" tabindex="-1" role="dialog" aria-labelledby="cadastrarDisciplinaLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cadastrarDisciplinaLabel">Cadastrar Nova Disciplina</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'listar_disciplinas' %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </form>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
