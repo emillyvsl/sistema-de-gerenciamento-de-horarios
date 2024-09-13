@@ -166,3 +166,31 @@ $(document).ready(function() {
         });
     });
 });
+
+$(document).ready(function() {
+    var adicionarDisciplinaUrl = "{% url 'adicionar_disciplina_professor' %}";
+
+
+    $('#adicionarDisciplinaModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Botão que acionou o modal
+        var professorId = button.data('id'); // Extrai o ID do professor
+        var modal = $(this);
+        modal.find('#id_professor').val(professorId);
+    });
+
+    $('#form-adicionar-disciplina').on('submit', function(event) {
+        event.preventDefault();
+        var form = $(this);
+        $.ajax({
+            url: adicionarDisciplinaUrl, // Usa a URL obtida do contexto do template
+            type: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                location.reload(); // Recarrega a página para atualizar a lista
+            },
+            error: function(xhr, status, error) {
+                console.error('Erro:', error);
+            }
+        });
+    });
+});

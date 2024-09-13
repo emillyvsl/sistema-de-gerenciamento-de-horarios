@@ -34,6 +34,11 @@
                     <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#excluirModal{{ professor.id }}">
                     Excluir
                     </button>
+
+                    <!-- Adicione este botão na tabela de ações -->
+                    <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#adicionarDisciplinaModal" data-id="{{ professor.id }}">Adicionar Disciplina</button>
+                    
+                    
                     <!-- Modal de Exclusão -->
                     <div class="modal fade" id="excluirModal{{ professor.id }}" tabindex="-1" aria-labelledby="excluirModalLabel{{ professor.id }}" aria-hidden="true">
                         <div class="modal-dialog">
@@ -132,6 +137,37 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de Adição de Disciplina -->
+<div class="modal fade" id="adicionarDisciplinaModal" tabindex="-1" role="dialog" aria-labelledby="adicionarDisciplinaModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="adicionarDisciplinaModalLabel">Adicionar Disciplina ao Professor</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form-adicionar-disciplina" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_disciplina">Disciplina:</label>
+                        <select class="form-control" id="id_disciplina" name="disciplina" required>
+                            <option value="" disabled selected>Selecione a disciplina</option>
+                            {% for disciplina in disciplinas %}
+                                <option value="{{ disciplina.id }}">{{ disciplina.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <input type="hidden" id="id_professor" name="professor_id">
+                    <button type="submit" class="btn btn-warning">Adicionar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -139,5 +175,5 @@
     <script>
         var baseEditarProfessorUrl = "{% url 'editar_professor' professor_id=0 %}"; // URL base com ID fictício
         var baseExcluirProfessorUrl = "{% url 'excluir_professor' 0 %}";
-    </script>
+        var adicionarDisciplinaUrl = "{% url 'adicionar_disciplina_professor' %}";    </script>
 {% endblock %}

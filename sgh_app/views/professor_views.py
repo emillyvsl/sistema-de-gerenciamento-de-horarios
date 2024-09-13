@@ -6,6 +6,7 @@ from django.urls import reverse
 from sgh_app.models.centro import Centro
 from sgh_app.models.coordenacao import Coordenacao
 from sgh_app.models.curso import Curso
+from sgh_app.models.disciplina import Disciplina
 from sgh_app.models.professor import Professor
 from sgh_app.forms import ProfessorForm
 
@@ -29,6 +30,10 @@ def listar_professores(request):
         # Filtra os professores com base no curso da coordenação
         professores = Professor.objects.filter(curso=curso)
         centros = Centro.objects.all()  # Para escolher o centro
+        disciplinas = Disciplina.objects.all()  # Lista de disciplinas
+        adicionar_disciplina_url = reverse('adicionar_disciplina_professor')
+
+
 
         if request.method == 'POST':
             form = ProfessorForm(request.POST)
@@ -46,6 +51,8 @@ def listar_professores(request):
             'form': form,
             'centros': centros,  # Lista de centros para escolha
             'curso': curso,
+            'disciplinas': disciplinas,  # Lista de disciplinas
+            'adicionar_disciplina_url': adicionar_disciplina_url, 
         }
 
         return render(request, 'professor.html', context)

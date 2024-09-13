@@ -1,5 +1,6 @@
 from django.urls import path
 
+from sgh_app.views.disciplinaProfessor import adicionar_disciplina_professor
 from sgh_app.views.disciplinas import editar_disciplina, excluir_disciplina, listar_disciplinas
 from .views.auth_views import login, user_logout, registro
 from .views.professor_views import editar_professor, excluir_professor, listar_professores
@@ -16,4 +17,4 @@ urlpatterns = [
     path('disciplinas/', listar_disciplinas, name='listar_disciplinas'), 
     path('disciplina/editar/<int:disciplina_id>/', editar_disciplina, name='editar_disciplina'),
     path('disciplina/excluir/<int:disciplina_id>/', excluir_disciplina, name='excluir_disciplina'),  
-]
+    path('professores/adicionar-disciplina/', adicionar_disciplina_professor, name='adicionar_disciplina_professor'),]
