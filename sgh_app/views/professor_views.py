@@ -30,7 +30,9 @@ def listar_professores(request):
         # Filtra os professores com base no curso da coordenação
         professores = Professor.objects.filter(curso=curso)
         centros = Centro.objects.all()  # Para escolher o centro
-        disciplinas = Disciplina.objects.all()  # Lista de disciplinas
+        # Filtra disciplinas com base no curso associado à coordenação
+        disciplinas = Disciplina.objects.filter(curso=curso)
+        
         adicionar_disciplina_url = reverse('adicionar_disciplina_professor')
 
 
