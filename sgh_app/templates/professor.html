@@ -149,7 +149,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="form-adicionar-disciplina" method="post">
+                <form action="{% url 'adicionar_disciplina_professor' %}" method="POST">
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="id_disciplina">Disciplina:</label>
