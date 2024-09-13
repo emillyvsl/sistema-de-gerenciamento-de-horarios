@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect
-from django.http import JsonResponse
+from django.contrib import messages  # Importa para usar mensagens
 from sgh_app.models.disciplina import Disciplina
 from sgh_app.models.disciplina_professor import DisciplinaProfessor
 from sgh_app.models.professor import Professor
@@ -15,5 +15,11 @@ def adicionar_disciplina_professor(request):
         # Adiciona a disciplina ao professor
         DisciplinaProfessor.objects.create(disciplina=disciplina, professor=professor)
         
-        return JsonResponse({'status': 'success'})
-    return JsonResponse({'status': 'error'}, status=400)
+        # Adiciona uma mensagem de sucesso
+        messages.success(request, 'Disciplina adicionada com sucesso!')
+        
+        # Redireciona para a lista de professores
+        return redirect('listar_professores')
+    
+    # Se não for um POST, redireciona de volta
+    return redirect('listar_professores')

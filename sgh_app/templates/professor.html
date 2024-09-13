@@ -14,31 +14,42 @@
         <thead>
             <tr>
                 <th>Nome</th>
-                <th>Centro</th>
-                <th>Ações</th>
+                <th class="text-center">Centro</th>
+                <th class="text-center">Ações</th>
             </tr>
         </thead>
         <tbody>
             {% for professor in professores %}
             <tr>
                 <td>{{ professor.nome }}</td>
-                <td>{{ professor.centro.nome }}</td>
-                <td>
+                <td class="text-center">{{ professor.centro.nome }}</td>
+                <td class="text-center">
                     <!-- Botão para abrir o modal -->
                     <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editarProfessorModal"
                     data-id="{{ professor.id }}" data-nome="{{ professor.nome }}" data-centro="{{ professor.centro_id }}">
-                    Editar
+                    <i class="fas fa-pencil-alt"></i> Editar
                     </button>
 
                     <!-- Botão Excluir e Modal -->
                     <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#excluirModal{{ professor.id }}">
-                    Excluir
+                        <i class="fas fa-trash-alt"></i> Excluir
                     </button>
 
-                    <!-- Adicione este botão na tabela de ações -->
-                    <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#adicionarDisciplinaModal" data-id="{{ professor.id }}">Adicionar Disciplina</button>
+
+                    <!-- Botão adicionar disciplina -->
+                    <button class="btn btn-warning btn-sm text-white" 
+                        data-toggle="modal" 
+                        data-target="#adicionarDisciplinaModal" 
+                        data-id="{{ professor.id }}"
+                        style="background-color: #FDB813; border-color: #FDB813;">
+                    <i class="fas fa-plus"></i> Atribuir Disciplina
+                    </button>
                     
-                    
+                    <!-- Botão para visualizar detalhes -->
+                    <a href="{% url 'detalhes_professor' professor.id %}" class="btn btn-dark btn-sm" title="Ver Detalhes">
+                        <i class="fas fa-eye"></i> <!-- Ícone de olho -->
+                    </a>
+
                     <!-- Modal de Exclusão -->
                     <div class="modal fade" id="excluirModal{{ professor.id }}" tabindex="-1" aria-labelledby="excluirModalLabel{{ professor.id }}" aria-hidden="true">
                         <div class="modal-dialog">
@@ -167,6 +178,8 @@
         </div>
     </div>
 </div>
+
+
 
 {% endblock %}
 

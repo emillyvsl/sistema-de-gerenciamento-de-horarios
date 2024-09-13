@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Detalhes do Professor{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Detalhes do Professor(a) {{ professor.nome }}</h2>
+
+    <div class="card">
+        <div class="card-header">
+            {{ professor.nome }}
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Centro</h5>
+            <p class="card-text">{{ professor.centro.nome }}</p>
+
+            <h5 class="card-title">Disciplinas Atribuídas</h5>
+                <ul class="list-group">
+                    {% for disciplina in disciplinas %}
+                    <li class="list-group-item">{{ disciplina.disciplina.nome }}</li>
+                    {% empty %}
+                    <li class="list-group-item">Nenhuma disciplina atribuída.</li>
+                    {% endfor %}
+                </ul>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'listar_professores' %}" class="btn btn-secondary">Voltar</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
