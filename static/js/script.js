@@ -129,49 +129,35 @@ window.excluirDisciplina = function(disciplinaId) {
 };
 
 $(document).ready(function() {
-    // Verifica o conteúdo do select na carga inicial
-    console.log("Conteúdo do select Período na carga inicial:", $('#id_periodo').html());
-
+    // Abrir o modal de edição e preencher os dados da disciplina
     $('#editarDisciplinaModal').on('show.bs.modal', function(event) {
-        var button = $(event.relatedTarget);
+        var button = $(event.relatedTarget);  // Botão que acionou o modal
         var disciplinaId = button.data('id');
         var disciplinaNome = button.data('nome');
-        var periodoId = button.data('periodo'); // ID do período
-
-        console.log("ID da Disciplina:", disciplinaId);
-        console.log("Nome da Disciplina:", disciplinaNome);
-        console.log("ID do Período:", periodoId);
+        var periodoId = button.data('periodo');  // ID do período selecionado
 
         var modal = $(this);
-        modal.find('#id_nome').val(disciplinaNome);
-
-        // Verifica o conteúdo do select Período
-        var selectPeriodo = modal.find('#id_periodo');
-        console.log("Select Período:", selectPeriodo);
-        console.log("Conteúdo do select Período ao abrir o modal:", selectPeriodo.html());
-        console.log("Valores das opções no select:", selectPeriodo.find('option').map(function() { return $(this).val(); }).get());
-
-        // Atribuir o valor do período
-        selectPeriodo.val(periodoId);
-
-        modal.find('#id_disciplina').val(disciplinaId);
+        modal.find('#id_nome').val(disciplinaNome);  // Preenche o campo nome
+        modal.find('#id_periodo').val(periodoId);    // Preenche o campo período com o valor atual
+        modal.find('#id_disciplina').val(disciplinaId);  // Insere o ID da disciplina
     });
 
+    // Submeter o formulário de edição via AJAX
     $('#form-editar-disciplina').on('submit', function(e) {
-        e.preventDefault();
+        e.preventDefault();  // Prevenir comportamento padrão do formulário
 
         var disciplinaId = $('#id_disciplina').val();
-        var editarUrl = baseEditarDisciplinaUrl.replace('0', disciplinaId);
+        var editarUrl = baseEditarDisciplinaUrl.replace('0', disciplinaId);  // Atualiza a URL com o ID da disciplina
 
         $.ajax({
             type: 'POST',
             url: editarUrl,
-            data: $(this).serialize(),
+            data: $(this).serialize(),  // Envia os dados do formulário
             success: function(response) {
                 if (response.success) {
-                    location.reload();
+                    location.reload();  // Recarrega a página se a operação for bem-sucedida
                 } else {
-                    alert('Erro: ' + response.error);
+                    alert('Erro: ' + response.errors);
                 }
             },
             error: function(xhr, status, error) {
@@ -180,4 +166,3 @@ $(document).ready(function() {
         });
     });
 });
-

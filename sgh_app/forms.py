@@ -11,14 +11,8 @@ class ProfessorForm(forms.ModelForm):
         fields = ['nome', 'centro'] 
 
 class DisciplinaForm(forms.ModelForm):
+    periodo = forms.ModelChoiceField(queryset=Periodo.objects.all(), empty_label="Selecione o período")
+
     class Meta:
         model = Disciplina
         fields = ['nome', 'periodo']
-        widgets = {
-            'periodo': forms.Select(),  # Widget para o campo 'periodo'
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Mostra todos os períodos disponíveis
-        self.fields['periodo'].queryset = Periodo.objects.all()

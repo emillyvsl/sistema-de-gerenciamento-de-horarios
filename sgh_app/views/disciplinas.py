@@ -16,6 +16,9 @@ def listar_disciplinas(request):
         # Filtra as disciplinas com base no curso da coordenação
         disciplinas = Disciplina.objects.filter(curso=curso)
 
+        # Obtém todos os períodos disponíveis
+        periodos = Periodo.objects.all()
+
         if request.method == 'POST':
             form = DisciplinaForm(request.POST)
             if form.is_valid():
@@ -31,6 +34,7 @@ def listar_disciplinas(request):
             'disciplinas': disciplinas,
             'form': form,
             'curso': curso,
+            'periodos': periodos,  # Passa os períodos para o template
         }
 
         return render(request, 'disciplinas.html', context)
@@ -38,27 +42,35 @@ def listar_disciplinas(request):
     except Coordenacao.DoesNotExist:
         messages.error(request, 'Você não está associado a uma coordenação de curso.')
         return redirect('logout')
+
     
 
+@login_required
 def editar_disciplina(request, disciplina_id):
     disciplina = get_object_or_404(Disciplina, id=disciplina_id)
-    periodos = Periodo.objects.all()  # Obtém todos os períodos
+    periodos = Periodo.objects.all()  # Obtém todos os períodos para preencher o select
 
     if request.method == 'POST':
         form = DisciplinaForm(request.POST, instance=disciplina)
         if form.is_valid():
             form.save()
             messages.success(request, 'Disciplina editada com sucesso!')
+
+            # Verifica se é uma requisição AJAX (JSON)
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True})
             return redirect('listar_disciplinas')
         else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'errors': form.errors})
             messages.error(request, 'Erro ao editar disciplina.')
     else:
         form = DisciplinaForm(instance=disciplina)
-    
+
     return render(request, 'editar_disciplina.html', {
         'form': form,
         'disciplina': disciplina,
-        'periodos': periodos
+        'periodos': periodos  # Envia os períodos para o template
     })
 
 
