@@ -32,14 +32,14 @@
                         data-id="{{ disciplina.id }}"
                         data-nome="{{ disciplina.nome }}"
                         data-periodo="{{ disciplina.periodo.id }}">
-                        Editar
+                        <i class="fas fa-pencil-alt"></i> Editar
                     </button>
 
                 
 
                     <!-- Botão Excluir e Modal -->
                     <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#excluirModal{{ disciplina.id }}">
-                    Excluir
+                        <i class="fas fa-trash-alt"></i> Excluir
                     </button>
                     <!-- Modal de Exclusão -->
                     <div class="modal fade" id="excluirModal{{ disciplina.id }}" tabindex="-1" aria-labelledby="excluirModalLabel{{ disciplina.id }}" aria-hidden="true">
