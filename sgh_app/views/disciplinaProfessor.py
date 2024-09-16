@@ -23,3 +23,10 @@ def adicionar_disciplina_professor(request):
     
     # Se não for um POST, redireciona de volta
     return redirect('listar_professores')
+
+def remover_disciplina_professor(request, disciplina_id):
+    disciplina_professor = get_object_or_404(DisciplinaProfessor, id=disciplina_id)
+    professor_id = disciplina_professor.professor.id
+    disciplina_professor.delete()
+    messages.success(request, 'Disciplina removida com sucesso!')
+    return redirect('detalhes_professor', professor_id=professor_id)

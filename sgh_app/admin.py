@@ -7,9 +7,9 @@ class CursoAdmin(admin.ModelAdmin):
     list_filter = ('centro',)
 
 class PeriodoAdmin(admin.ModelAdmin):
-    list_display = ('tipo_periodo',)  # Remova 'curso' daqui
-    search_fields = ('tipo_periodo__nome',)  # Remova 'curso__nome'
-    list_filter = ('tipo_periodo',)  # Remova 'curso'
+    list_display = ('tipo_periodo',)  
+    search_fields = ('tipo_periodo__nome',)  
+    list_filter = ('tipo_periodo',)  
 
 admin.site.register(Centro)
 admin.site.register(Curso, CursoAdmin)
