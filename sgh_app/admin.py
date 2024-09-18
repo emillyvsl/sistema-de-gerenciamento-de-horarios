@@ -7,7 +7,7 @@ class CursoAdmin(admin.ModelAdmin):
     list_filter = ('centro',)
 
 class PeriodoAdmin(admin.ModelAdmin):
-    list_display = ('tipo_periodo',)  
+    list_display = ('numero', 'tipo_periodo',)  
     search_fields = ('tipo_periodo__nome',)  
     list_filter = ('tipo_periodo',)  
 
