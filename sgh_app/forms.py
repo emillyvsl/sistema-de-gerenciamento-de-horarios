@@ -2,7 +2,6 @@
 from django import forms
 from sgh_app.models.disciplina import Disciplina
 from sgh_app.models.periodo import Periodo
-from sgh_app.models.tipo_periodo import TipoPeriodo
 from .models import Professor
 
 class ProfessorForm(forms.ModelForm):

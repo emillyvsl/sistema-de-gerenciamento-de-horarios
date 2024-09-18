@@ -18,6 +18,7 @@ def listar_disciplinas(request):
 
         # Obtém todos os períodos disponíveis
         periodos = Periodo.objects.all()
+        
 
         if request.method == 'POST':
             form = DisciplinaForm(request.POST)

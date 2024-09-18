@@ -17,6 +17,7 @@
             <tr>
                 <th>Nome</th>
                 <th>Período</th>
+                <th>Semestre</th> <!-- Adicione esta coluna -->
                 <th class="text-center">Ações</th>
             </tr>
         </thead>
@@ -24,7 +25,8 @@
             {% for disciplina in disciplinas %}
             <tr>
                 <td>{{ disciplina.nome }}</td>
-                <td>{{ disciplina.periodo }}</td>
+                <td>{{ disciplina.periodo.numero }}</td>
+                <td>{{ disciplina.periodo.semestre }}</td> <!-- Adicione esta linha -->
                 <td class="text-center">
                     <button 
                         type="button" 
@@ -33,11 +35,10 @@
                         data-target="#editarDisciplinaModal"
                         data-id="{{ disciplina.id }}"
                         data-nome="{{ disciplina.nome }}"
-                        data-periodo="{{ disciplina.periodo.id }}">
+                        data-periodo="{{ disciplina.periodo.id }}"
+                        data-semestre="{{ disciplina.periodo.tipo_periodo.id }}">
                         <i class="fas fa-pencil-alt"></i> Editar
                     </button>
-
-                
 
                     <!-- Botão Excluir e Modal -->
                     <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#excluirModal{{ disciplina.id }}">
@@ -64,7 +65,7 @@
                         </div>
                     </div>
 
-                   <!-- Modal de Edição -->
+                    <!-- Modal de Edição -->
                     <div class="modal fade" id="editarDisciplinaModal" tabindex="-1" role="dialog" aria-labelledby="editarDisciplinaModalLabel" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
@@ -89,6 +90,7 @@
                                                 {% endfor %}
                                             </select>
                                         </div>
+                                
                                         <input type="hidden" id="id_disciplina" name="disciplina_id">
                                         <button type="submit" class="btn btn-primary">Salvar</button>
                                     </form>
@@ -101,7 +103,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="3">Nenhuma disciplina cadastrada.</td>
+                <td colspan="4">Nenhuma disciplina cadastrada.</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -133,6 +135,7 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        
                         <button type="submit" class="btn btn-success">Salvar</button>
                     </form>
                 </div>

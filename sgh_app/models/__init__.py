@@ -4,7 +4,7 @@ from .coordenacao import Coordenacao
 from .professor import Professor
 from .disciplina import Disciplina
 from .disciplina_professor import DisciplinaProfessor
-from .tipo_periodo import TipoPeriodo
+from .semestre import Semestre
 from .periodo import Periodo
 from .dias_semana import DiasSemana
 from .horario_curso import HorarioCurso
