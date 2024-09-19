@@ -67,30 +67,6 @@ def listar_professores(request):
         return redirect('logout')
     
     
-def adicionar_preferencia_professor(request, professor_id):
-    professor = get_object_or_404(Professor, id=professor_id)
-
-    if request.method == "POST":
-        dias_preferidos_ids = request.POST.getlist('dias_preferidos')  # Múltiplos valores podem ser retornados
-        horas_preferidas_ids = request.POST.getlist('horas_preferidas')  # Múltiplos valores podem ser retornados
-
-        preferencia = Preferencias(professor=professor)
-        preferencia.save()
-
-        # Associar os dias e horários selecionados
-        preferencia.dias_preferidos.set(DiasSemana.objects.filter(id__in=dias_preferidos_ids))
-        preferencia.horas_preferidas.set(HorarioCurso.objects.filter(id__in=horas_preferidas_ids))
-
-        preferencia.save()
-
-        messages.success(request, 'Preferência de horário adicionada com sucesso!')
-        return redirect('detalhes_professor', professor_id=professor.id)  # Redirecionar para detalhes do professor
-
-    return redirect('detalhes_professor', professor_id=professor.id)  # Também redirecionar para detalhes do professor se não for POST
-
-
-
-
 @login_required
 def excluir_professor(request, professor_id):
     # Verifica se o método da requisição é POST
