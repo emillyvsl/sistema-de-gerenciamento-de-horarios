@@ -28,10 +28,75 @@
                 <li class="list-group-item">Nenhuma disciplina atribuída.</li>
                 {% endfor %}
             </ul>
+
+            <h5 class="card-title mt-4">Preferências de Horário</h5>
+            <ul class="list-group">
+                {% for preferencia in preferencias %}
+                <li class="list-group-item">
+                    <strong>Dia Preferido:</strong>
+                    {% for dia in preferencia.dias_preferidos.all %}
+                        {{ dia.nome }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                    <br>
+                    <strong>Horário desse dia:</strong>
+                    {% for hora in preferencia.horas_preferidas.all %}
+                        {{ hora }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </li>
+                {% empty %}
+                <li class="list-group-item">Nenhuma preferência registrada.</li>
+                {% endfor %}
+            </ul>
+
         </div>
         <div class="card-footer">
             <a href="{% url 'listar_professores' %}" class="btn btn-secondary">Voltar</a>
+
+            <!-- Botão para abrir o modal de adicionar preferências -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addPreferenciaModal">
+                Adicionar Preferência
+            </button>
         </div>
     </div>
 </div>
+
+<!-- Modal para adicionar preferências -->
+<div class="modal fade" id="addPreferenciaModal" tabindex="-1" role="dialog" aria-labelledby="addPreferenciaLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form method="POST" action="{% url 'adicionar_preferencia_professor' professor.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPreferenciaLabel">Adicionar Preferência de Horário</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="dias_preferidos">Dia Preferido</label>
+                        <select name="dias_preferidos" class="form-control" required>
+                            {% for dia in dias_semana %}
+                            <option value="{{ dia.id }}">{{ dia.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="horas_preferidas">Horário Preferido</label>
+                        <select name="horas_preferidas" class="form-control" required>
+                            {% for horario in horarios_curso %}
+                            <option value="{{ horario.id }}">{{ horario }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Preferência</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

@@ -185,10 +185,3 @@
 
 {% endblock %}
 
-{% block extra_js %}
-    <script src="{% static 'js/script.js' %}"></script>
-    <script>
-        var baseEditarProfessorUrl = "{% url 'editar_professor' professor_id=0 %}"; // URL base com ID fictício
-        var baseExcluirProfessorUrl = "{% url 'excluir_professor' 0 %}";
-        var adicionarDisciplinaUrl = "{% url 'adicionar_disciplina_professor' %}";    </script>
-{% endblock %}

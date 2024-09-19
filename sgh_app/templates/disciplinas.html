@@ -146,10 +146,5 @@
 
 {% endblock %}
 
-{% block extra_js %}
-    <script src="{% static 'js/script.js' %}"></script>
-    <script>
-        var baseEditarDisciplinaUrl = "{% url 'editar_disciplina' disciplina_id=0 %}"; // URL base com ID fictício
-        var baseExcluirDisciplinaUrl = "{% url 'excluir_disciplina' 0 %}";
-    </script>
-{% endblock %}
+
+

@@ -194,3 +194,45 @@ $(document).ready(function() {
         });
     });
 });
+
+
+// Aguarda o carregamento do documento
+$(document).ready(function() {
+    // Captura o envio do formulário de adicionar preferência
+    $('#addPreferenciaModal form').on('submit', function(e) {
+        e.preventDefault(); // Impede o envio padrão do formulário
+        
+        // Captura os dados do formulário
+        var formData = $(this).serialize();
+        
+        // Faz a requisição AJAX para enviar o formulário
+        $.ajax({
+            url: $(this).attr('action'),  // Pega a URL de ação do formulário
+            type: 'POST',
+            data: formData,
+            success: function(response) {
+                // Fecha o modal após o sucesso
+                $('#addPreferenciaModal').modal('hide');
+                
+                // Exibe uma mensagem de sucesso (você pode usar o SweetAlert2 para isso)
+                Swal.fire({
+                    title: 'Sucesso!',
+                    text: 'Preferência adicionada com sucesso.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+
+                // Opcionalmente, você pode atualizar a lista de preferências na página sem recarregar.
+            },
+            error: function(xhr, status, error) {
+                // Exibe uma mensagem de erro
+                Swal.fire({
+                    title: 'Erro!',
+                    text: 'Ocorreu um erro ao adicionar a preferência.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    });
+});
