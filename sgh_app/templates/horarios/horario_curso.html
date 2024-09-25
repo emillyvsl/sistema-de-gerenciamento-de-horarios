@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Horários e Gerenciamento{% endblock %}
+
+{% block content %}
+<div class="container mt-5 ">
+    <div class="row">
+        <!-- Card 1: Horários do Curso -->
+        <div class="col-md-6">
+            <div class="card text-center">
+                <div class="card-header">
+                    Horários do Curso
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Visualizar Horários do Curso</h5>
+                    <p class="card-text">Veja todos os horários disponíveis para os cursos cadastrados.</p>
+                    <a href="{% url 'horarios_adicionar' %}" class="btn btn-primary">Ver Horários</a>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- Card 2: Gerenciar Horários do Semestre -->
+        <div class="col-md-6">
+            <div class="card text-center">
+                <div class="card-header">
+                    Gerenciar Horários do Semestre
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Adicionar ou Editar Horários do Semestre</h5>
+                    <p class="card-text">Gerencie os horários de disciplinas para o semestre atual.</p>
+                    <a href="#" class="btn btn-success">Gerenciar Horários</a>
+                </div>
+               
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

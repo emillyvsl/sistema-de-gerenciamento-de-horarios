@@ -7,6 +7,7 @@ from sgh_app.views.preferenciaProfessor import adicionar_preferencia_professor, 
 from .views.auth_views import login, user_logout, registro
 from .views.professor_views import editar_professor, excluir_professor, listar_professores
 from .views.index_views import index  # Se você criar um arquivo separado para a view `index`
+from .views.horarios import horarios_curso,horarios_adicionar,horarios_editar,horarios_excluir
 
 urlpatterns = [
     path('', login, name='login'), 
@@ -24,5 +25,9 @@ urlpatterns = [
     path('professor/remover_disciplina/<int:disciplina_id>/', remover_disciplina_professor, name='remover_disciplina_professor'),
     path('professor/adicionar-preferencia/<int:professor_id>/', adicionar_preferencia_professor, name='adicionar_preferencia_professor'),
     path('preferencia/<int:preferencia_id>/remover/<int:professor_id>/', remover_preferencia_professor, name='remover_preferencia_professor'), 
+    path('horarios/', horarios_curso, name='horarios_curso'),
+    path('horarios/adicionar/', horarios_adicionar, name='horarios_adicionar'),
+    path('horarios/editar/<int:horario_id>/', horarios_editar, name='horarios_editar'),
+    path('horarios/excluir/<int:horario_id>/', horarios_excluir, name='horarios_excluir'),
      
      ] 
