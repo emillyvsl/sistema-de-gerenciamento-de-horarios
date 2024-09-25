@@ -6,7 +6,7 @@ class Periodo(models.Model):
     numero = models.IntegerField('Periodo', default=1)
 
     def __str__(self):
-        return f'{self.numero} - {self.semestre}'
+        return f'{self.numero} Período do {self.semestre}'
 
     def get_nome_periodo(self):
-        return f'{self.numero} - {self.semestre}'
+        return f'{self.numero} Período do {self.semestre}'
