@@ -1,5 +1,6 @@
 # sgh_app/views/preferencia_professor.py
 
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from sgh_app.models.dias_semana import DiasSemana
@@ -27,6 +28,27 @@ def adicionar_preferencia_professor(request, professor_id):
         return redirect('detalhes_professor', professor_id=professor.id)  # Redirecionar para detalhes do professor
 
     return redirect('detalhes_professor', professor_id=professor.id)  # Também redirecionar para detalhes do professor se não for POST
+
+
+def buscar_dias_relacionados(request):
+    horario_id = request.GET.get('horario_id')
+
+    if horario_id is None:
+        return JsonResponse({'error': 'horario_id não fornecido.'}, status=400)
+
+    try:
+        # Filtra o HorarioCurso usando o horario_id
+        horario_curso = HorarioCurso.objects.get(id=horario_id)
+        dias = horario_curso.dias_semana.all()  # Pega todos os dias associados a esse horário
+
+        dias_list = [{'id': dia.id, 'nome': dia.nome} for dia in dias]
+
+        return JsonResponse({'dias': dias_list})
+    except HorarioCurso.DoesNotExist:
+        return JsonResponse({'error': 'HorarioCurso não encontrado.'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
 
 
 def remover_preferencia_professor(request, preferencia_id, professor_id):

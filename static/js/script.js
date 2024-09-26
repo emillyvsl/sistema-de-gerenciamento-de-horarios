@@ -196,43 +196,63 @@ $(document).ready(function() {
 });
 
 
-// Aguarda o carregamento do documento
-    $(document).ready(function() {
-        // Captura o envio do formulário de adicionar preferência
-        $('#addPreferenciaModal form').on('submit', function(e) {
-            e.preventDefault(); // Impede o envio padrão do formulário
-            
-            // Captura os dados do formulário
-            var formData = $(this).serialize();
-            
-            // Faz a requisição AJAX para enviar o formulário
-            $.ajax({
-                url: $(this).attr('action'),  // Pega a URL de ação do formulário
-                type: 'POST',
-                data: formData,
-                success: function(response) {
-                    // Fecha o modal após o sucesso
-                    $('#addPreferenciaModal').modal('hide');
-                    
-                    // Exibe uma mensagem de sucesso (você pode usar o SweetAlert2 para isso)
-                    Swal.fire({
-                        title: 'Sucesso!',
-                        text: 'Preferência adicionada com sucesso.',
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    });
+$(document).ready(function() {
+    $('#horas_preferidas').on('change', function() {
+        var selectedHorarioId = $(this).val(); // Obtenha o ID do horário selecionado
 
-                    // Opcionalmente, você pode atualizar a lista de preferências na página sem recarregar.
+        console.log("Horário selecionado: " + selectedHorarioId); // Debug
+
+        if (selectedHorarioId) {
+            // Faça a requisição AJAX apenas se um horário for selecionado
+            $.ajax({
+                url: buscarDiasRelacionadosUrl + "?horario_id=" + selectedHorarioId,
+                method: "GET",
+                success: function(response) {
+                    // Supondo que response contenha os dias relacionados
+                    $('#dias_relacionados').empty(); // Limpe os dias relacionados antes de adicionar novos
+                    if (response.dias.length > 0) {
+                        response.dias.forEach(function(dia) {
+                            $('#dias_relacionados').append(`
+                                <div>
+                                    <input type="checkbox" id="dia-${dia.id}" name="dias_preferidos" value="${dia.id}">
+                                    <label for="dia-${dia.id}">${dia.nome}</label>
+                                </div>
+                            `);
+                        });
+                    } else {
+                        $('#dias_relacionados').append('<div>Nenhum dia relacionado encontrado.</div>');
+                    }
                 },
-                error: function(xhr, status, error) {
-                    // Exibe uma mensagem de erro
-                    Swal.fire({
-                        title: 'Erro!',
-                        text: 'Ocorreu um erro ao adicionar a preferência.',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
+                error: function(xhr) {
+                    console.error("Erro na requisição:", xhr);
                 }
             });
+        } else {
+            $('#dias_relacionados').empty(); // Limpe os dias se nenhum horário for selecionado
+        }
+    });
+
+    // Captura o envio do formulário de adicionar preferência
+    $('#addPreferenciaModal form').on('submit', function(e) {
+        e.preventDefault(); // Impede o envio padrão do formulário
+
+        var formData = $(this).serialize(); // Captura os dados do formulário
+
+        // Faz a requisição AJAX para enviar o formulário
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: formData,
+            success: function(response) {
+                $('#addPreferenciaModal').modal('hide');
+                alert('Preferência adicionada com sucesso.');
+                // Opcionalmente, atualize a lista de preferências na página
+            },
+            error: function() {
+                alert('Erro: Ocorreu um erro ao adicionar a preferência.');
+            }
         });
     });
+
+
+});
