@@ -13,45 +13,43 @@ from django.core.exceptions import ObjectDoesNotExist
 def horarios_curso(request):
     return render(request, 'horarios/horario_curso.html')
 
-@login_required
 def horarios_adicionar(request):
-    try:
-        # Obtendo o curso a partir da coordenação do usuário logado
-        coordenacao = request.user.coordenacao
-        curso = coordenacao.curso
-    except ObjectDoesNotExist:  # type: ignore
-        return render(request, 'erro.html', {
-            'mensagem': 'Você não tem uma coordenação associada. Por favor, contate o administrador.'
-        })
+    # Obtendo o curso a partir da coordenação do usuário logado
+    coordenacao = request.user.coordenacao
+    curso = coordenacao.curso
 
+    # Se for uma requisição POST, processamos o formulário
     if request.method == 'POST':
         dias_ids = request.POST.getlist('dias_semana')
-        horas_inicio = request.POST.getlist('hora_inicio[]')
-        horas_fim = request.POST.getlist('hora_fim[]')
+        hora_inicio = request.POST['hora_inicio']
+        hora_fim = request.POST['hora_fim']
         
         # Obtém os objetos DiasSemana pelos IDs selecionados
         dias = DiasSemana.objects.filter(id__in=dias_ids)
         
-        # Cria novos horários para cada par de início/fim
-        for inicio, fim in zip(horas_inicio, horas_fim):
-            novo_horario = HorarioCurso.objects.create(
-                curso=curso,
-                hora_inicio=inicio,
-                hora_fim=fim
-            )
-            novo_horario.dias_semana.set(dias)
-            novo_horario.save()
+        # Cria um novo HorarioCurso associado ao curso do coordenador
+        novo_horario = HorarioCurso.objects.create(
+            curso=curso,
+            hora_inicio=hora_inicio,
+            hora_fim=hora_fim
+        )
+        
+        # Adiciona os dias da semana selecionados
+        novo_horario.dias_semana.set(dias)
+        novo_horario.save()
 
         return redirect('horarios_adicionar')
 
+    # Para requisições GET, renderizamos a tabela com horários
     dias = DiasSemana.objects.all()
     horarios_curso = HorarioCurso.objects.filter(curso=curso)
 
+    # Organizando horários por dia da semana
     horarios_por_dia = defaultdict(list)
     for horario in horarios_curso:
         for dia in horario.dias_semana.all():
             horarios_por_dia[dia.nome].append(horario)
-    
+
     return render(request, 'horarios/horario_adicionar.html', {
         'dias': dias,
         'horarios_por_dia': dict(horarios_por_dia),
@@ -69,7 +67,6 @@ def horarios_editar(request, horario_id):
         messages.success(request, 'Horário editado com sucesso!')
         return redirect('horarios_adicionar')  # Redireciona para a lista de horários
 
-    return redirect('horarios_adicionar')
 
 @login_required
 def horarios_excluir(request, horario_id):

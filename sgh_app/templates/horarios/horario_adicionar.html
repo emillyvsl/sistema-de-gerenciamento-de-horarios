@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container mb-10">
+  <div class="container">
     <!-- Botão para adicionar horário que abre o modal -->
     <div class="text-right mb-4">
       <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#modalAdicionarHorario">Adicionar Horário</a>
@@ -17,39 +17,30 @@
       <thead>
         <tr>
           <th>Dia da Semana</th>
-          <th>Horários</th>
+          <th>Horário</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody>
         {% for dia, horarios in horarios_por_dia.items %}
-          <tr>
-            <td>{{ dia }}</td>
-            <td>
-              <ul class="list-unstyled">
-                {% for horario in horarios %}
-                  <li>
-                    {{ horario.hora_inicio }} - {{ horario.hora_fim }}
-                    <!-- Botão para abrir modal de edição -->
-                    <button class="btn btn-sm btn-primary" 
-                            data-toggle="modal" 
-                            data-target="#modalEditarHorario"
-                            data-id="{{ horario.id }}"
-                            data-dia-semana="{{ dia }}"  <!-- Adicione o dia da semana -->
-                            data-hora-inicio="{{ horario.hora_inicio }}"
-                            data-hora-fim="{{ horario.hora_fim }}">
-                      Editar
-                    </button>
+          {% for horario in horarios %}
+            <tr>
+              {% if forloop.first %}
+                <td rowspan="{{ horarios|length }}">{{ dia }}</td> <!-- Mescla a célula de 'Dia da Semana' -->
+              {% endif %}
+              <td>{{ horario.hora_inicio }} - {{ horario.hora_fim }}</td>
+              <td>
+                <!-- Botão para abrir o modal de edição -->
+                <button class="btn btn-warning btn-sm" data-horario-id="{{ horario.id }}" data-hora-inicio="{{ horario.hora_inicio }}" data-hora-fim="{{ horario.hora_fim }}" onclick="abrirModalEditar(this)">Editar</button>
 
-                    <!-- Formulário para excluir o horário -->
-                    <form method="POST" action="{% url 'horarios_excluir' horario.id %}" style="display: inline;">
-                      {% csrf_token %}
-                      <button type="submit" class="btn btn-danger btn-sm">Remover</button>
-                    </form>
-                  </li>
-                {% endfor %}
-              </ul>
-            </td>
-          </tr>
+                <!-- Formulário para excluir horário -->
+                <form action="{% url 'horarios_excluir' horario.id %}" method="POST" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
         {% endfor %}
       </tbody>
     </table>
@@ -67,25 +58,21 @@
           {% csrf_token %}
           <div class="modal-body">
             <div class="form-group">
-              <label for="dias_semana">Dias da Semana</label>
-              <div class="form-check">
+              <label for="dias_semana">Dia da Semana</label>
+              <select multiple class="form-control" id="dias_semana" name="dias_semana">
                 {% for dia in dias %}
-                  <input class="form-check-input" type="checkbox" id="dia_{{ dia.id }}" name="dias_semana" value="{{ dia.id }}" />
-                  <label class="form-check-label" for="dia_{{ dia.id }}">{{ dia.nome }}</label><br />
+                  <option value="{{ dia.id }}">{{ dia.nome }}</option>
                 {% endfor %}
-              </div>
+              </select>
             </div>
-            <div id="horarios-container">
-              <div class="form-group">
-                <label for="hora_inicio">Hora de Início</label>
-                <input type="time" class="form-control" id="hora_inicio" name="hora_inicio[]" required />
-              </div>
-              <div class="form-group">
-                <label for="hora_fim">Hora de Fim</label>
-                <input type="time" class="form-control" id="hora_fim" name="hora_fim[]" required />
-              </div>
+            <div class="form-group">
+              <label for="hora_inicio">Hora de Início</label>
+              <input type="time" class="form-control" id="hora_inicio" name="hora_inicio" required />
             </div>
-            <button type="button" id="adicionar-horario" class="btn btn-secondary">Adicionar Mais Horários</button>
+            <div class="form-group">
+              <label for="hora_fim">Hora de Fim</label>
+              <input type="time" class="form-control" id="hora_fim" name="hora_fim" required />
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
@@ -104,44 +91,50 @@
           <h5 class="modal-title" id="modalEditarLabel">Editar Horário</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         </div>
-        <form id="formEditarHorario" method="POST">
+        <form method="POST" id="formEditarHorario">
           {% csrf_token %}
           <div class="modal-body">
+            <input type="hidden" id="editarHorarioId" name="horario_id" />
             <div class="form-group">
-              <label for="hora_inicio_editar">Hora de Início</label>
-              <input type="time" class="form-control" id="hora_inicio_editar" name="hora_inicio" required />
+              <label for="editarHoraInicio">Hora de Início</label>
+              <input type="time" class="form-control" id="editarHoraInicio" name="hora_inicio" required />
             </div>
             <div class="form-group">
-              <label for="hora_fim_editar">Hora de Fim</label>
-              <input type="time" class="form-control" id="hora_fim_editar" name="hora_fim" required />
+              <label for="editarHoraFim">Hora de Fim</label>
+              <input type="time" class="form-control" id="editarHoraFim" name="hora_fim" required />
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
           </div>
         </form>
       </div>
     </div>
   </div>
-
   <script>
-    // Configura o modal com os dados do horário ao clicar em "Editar"
-    $('#modalEditarHorario').on('show.bs.modal', function (event) {
-      var button = $(event.relatedTarget); // Botão que acionou o modal
-      var horarioId = button.data('id');
-      var horaInicio = button.data('hora-inicio');
-      var horaFim = button.data('hora-fim');
-      var diaSemana = button.data('dia-semana'); // Adicione o dia da semana
-
-      // Atualiza os valores do modal com os dados do horário
-      var modal = $(this);
-      modal.find('#hora_inicio_editar').val(horaInicio);
-      modal.find('#hora_fim_editar').val(horaFim);
-
-      // Atualiza o action do formulário de edição
-      var form = modal.find('#formEditarHorario');
-      form.attr('action', '/horarios/editar/' + horarioId + '/');
-    });
+    function abrirModalEditar(button) {
+      // Pegar os dados do botão de edição
+      var horarioId = button.getAttribute('data-horario-id')
+      var horaInicio = button.getAttribute('data-hora-inicio')
+      var horaFim = button.getAttribute('data-hora-fim')
+    
+      // Preencher o modal com os valores
+      document.getElementById('editarHorarioId').value = horarioId
+      document.getElementById('editarHoraInicio').value = horaInicio
+      document.getElementById('editarHoraFim').value = horaFim
+    
+      // Abrir o modal
+      var modal = new bootstrap.Modal(document.getElementById('modalEditarHorario'))
+      modal.show()
+    }
+    
+    // Redirecionar o form para o URL correto ao submeter
+    document.getElementById('formEditarHorario').addEventListener('submit', function (event) {
+      event.preventDefault() // Evitar o envio padrão
+      var horarioId = document.getElementById('editarHorarioId').value
+      this.action = '/horarios/editar/' + horarioId + '/' // Definir o action do form
+      this.submit() // Submeter o form
+    })
   </script>
 {% endblock %}
