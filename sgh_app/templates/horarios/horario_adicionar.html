@@ -59,7 +59,7 @@
           <div class="modal-body">
             <div class="form-group">
               <label for="dias_semana">Dia da Semana</label>
-              <select multiple class="form-control" id="dias_semana" name="dias_semana">
+              <select class="form-control" id="dias_semana" name="dias_semana">
                 {% for dia in dias %}
                   <option value="{{ dia.id }}">{{ dia.nome }}</option>
                 {% endfor %}
