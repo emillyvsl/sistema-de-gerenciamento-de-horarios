@@ -1,38 +1,39 @@
 {% extends 'base.html' %}
 {% load static %}
 
+
 {% block title %}
   Horários do Curso
 {% endblock %}
 
 {% block content %}
-  <div class="container">
+  <div class="container margin-top">
     <!-- Botão para adicionar horário que abre o modal -->
     <div class="text-right mb-4">
       <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#modalAdicionarHorario">Adicionar Horário</a>
     </div>
 
     <!-- Tabela de horários por dia da semana -->
-    <table class="table table-bordered">
+    <table class="table table-borderless">
       <thead>
         <tr>
-          <th>Dia da Semana</th>
-          <th>Horário</th>
-          <th>Ações</th>
+          <th scope="col">Dia da Semana</th>
+          <th scope="col">Horário</th>
+          <th scope="col">Ações</th>
         </tr>
       </thead>
       <tbody>
         {% for dia, horarios in horarios_por_dia.items %}
           {% for horario in horarios %}
-            <tr>
+            <tr class="linha-dia-{{ forloop.parentloop.counter }}"> <!-- Adiciona uma classe específica por dia -->
               {% if forloop.first %}
-                <td rowspan="{{ horarios|length }}">{{ dia }}</td> <!-- Mescla a célula de 'Dia da Semana' -->
+                <td rowspan="{{ horarios|length }}" class="linha-principal">{{ dia }}</td>
               {% endif %}
-              <td>{{ horario.hora_inicio }} - {{ horario.hora_fim }}</td>
+              <td>{{ horario.hora_inicio }} a {{ horario.hora_fim }}</td>
               <td>
                 <!-- Botão para abrir o modal de edição -->
                 <button class="btn btn-warning btn-sm" data-horario-id="{{ horario.id }}" data-hora-inicio="{{ horario.hora_inicio }}" data-hora-fim="{{ horario.hora_fim }}" onclick="abrirModalEditar(this)">Editar</button>
-
+    
                 <!-- Formulário para excluir horário -->
                 <form action="{% url 'horarios_excluir' horario.id %}" method="POST" style="display:inline;">
                   {% csrf_token %}
@@ -44,6 +45,7 @@
         {% endfor %}
       </tbody>
     </table>
+    
   </div>
 
   <!-- Modal para adicionar horário -->
