@@ -10,4 +10,4 @@ class HorarioCurso(models.Model):
 
     def __str__(self):
         dias = ', '.join([dia.nome for dia in self.dias_semana.all()])
-        return f"{self.hora_inicio} a {self.hora_fim} ({dias})"
+        return f"{self.hora_inicio} a {self.hora_fim}"
