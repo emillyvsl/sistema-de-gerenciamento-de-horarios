@@ -13,22 +13,7 @@
             <h5 class="card-title">Centro</h5>
             <p class="card-text">{{ professor.centro.nome }}</p>
 
-            <h5 class="card-title">Disciplinas Atribuídas</h5>
-            <ul class="list-group">
-                {% for disciplina_professor in disciplinas %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ disciplina_professor.disciplina.nome }}
-                    <!-- Botão para remover a disciplina -->
-                    <form method="POST" action="{% url 'remover_disciplina_professor' disciplina_professor.id %}" style="margin: 0;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-sm">Remover</button>
-                    </form>
-                </li>
-                {% empty %}
-                <li class="list-group-item">Nenhuma disciplina atribuída.</li>
-                {% endfor %}
-            </ul>
-
+            <!-- Preferências de Horário -->
             <h5 class="card-title mt-4">Preferências de Horário</h5>
             <ul class="list-group">
                 {% for preferencia in preferencias %}
@@ -37,8 +22,8 @@
                         <ul>
                             {% for horario in preferencia.horas_preferidas.all %}
                             <li>
-                                <strong>Dias:</strong> 
-                                {% for dia in horario.dias_semana.all %}
+                                <strong>Dias:</strong>
+                                {% for dia in preferencia.dias_preferidos.all %}
                                     {{ dia.nome }}{% if not forloop.last %}, {% endif %}
                                 {% endfor %}
                                 <br>
