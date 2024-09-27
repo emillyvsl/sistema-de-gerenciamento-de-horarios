@@ -11,6 +11,11 @@ def adicionar_disciplina_professor(request):
         
         disciplina = get_object_or_404(Disciplina, id=disciplina_id)
         professor = get_object_or_404(Professor, id=professor_id)
+
+        # Verifica se a disciplina já está atribuída ao professor
+        if DisciplinaProfessor.objects.filter(disciplina=disciplina, professor=professor).exists():
+            messages.warning(request, 'Essa disciplina já está atribuída a este professor.')
+            return redirect('detalhes_professor', professor_id=professor_id)
         
         # Adiciona a disciplina ao professor
         DisciplinaProfessor.objects.create(disciplina=disciplina, professor=professor)
@@ -23,6 +28,7 @@ def adicionar_disciplina_professor(request):
     
     # Se não for um POST, redireciona de volta
     return redirect('listar_professores')
+
 
 def remover_disciplina_professor(request, disciplina_id):
     disciplina_professor = get_object_or_404(DisciplinaProfessor, id=disciplina_id)
