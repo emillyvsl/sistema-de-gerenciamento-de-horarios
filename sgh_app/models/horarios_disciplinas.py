@@ -5,7 +5,7 @@ from .horario_curso import HorarioCurso  # Importando o modelo HorarioCurso
 
 class HorariosDisciplinas(models.Model):
     # Relacionamento com DisciplinaProfessor (associa uma disciplina a um professor)
-    disciplina_professor = models.ForeignKey(DisciplinaProfessor, on_delete=models.CASCADE, related_name='horarios_disciplinas')
+    disciplina_professor = models.ForeignKey(DisciplinaProfessor, on_delete=models.CASCADE, related_name='horarios_disciplinas', null=True,)  # Permite valores nulosblank=True  # Permite que o campo fique em branco )
     
     # Relacionamento com HorarioCurso (reutilizando os horários e dias definidos no curso)
     horario_curso = models.ForeignKey(HorarioCurso, on_delete=models.CASCADE, related_name='horarios_disciplinas', default=1)
@@ -17,6 +17,6 @@ class HorariosDisciplinas(models.Model):
         unique_together = ('disciplina_professor', 'horario_curso', 'ano_semestre')
 
     def __str__(self):
-        return f"{self.disciplina_professor} ({self.horario_curso.hora_inicio} - {self.horario_curso.hora_fim}) - {self.horario_curso.curso} - {self.ano_semestre}"
-
-    
+        # Modificando a string de representação para lidar com o caso de disciplina_professor ser None
+        professor_info = self.disciplina_professor if self.disciplina_professor else "Sem professor"
+        return f"{professor_info} ({self.horario_curso.hora_inicio} - {self.horario_curso.hora_fim}) - {self.horario_curso.curso} - {self.ano_semestre}"

@@ -1,14 +1,16 @@
 from django.urls import path
-
 from sgh_app.views.detalhesProfessor import detalhes_professor
 from sgh_app.views.disciplinaProfessor import adicionar_disciplina_professor, remover_disciplina_professor
 from sgh_app.views.disciplinas import editar_disciplina, excluir_disciplina, listar_disciplinas
+from sgh_app.views.gerar_horarios import gerarHorarios
 from sgh_app.views.horarioDisciplina import horarioDisciplina
 from sgh_app.views.preferenciaProfessor import adicionar_preferencia_professor, buscar_dias_relacionados, remover_preferencia_professor
 from .views.auth_views import login, user_logout, registro
 from .views.professor_views import editar_professor, excluir_professor, listar_professores
 from .views.index_views import index  # Se você criar um arquivo separado para a view `index`
 from .views.horarios import horarios_curso,horarios_adicionar,horarios_editar,horarios_excluir
+
+
 
 urlpatterns = [
     path('', login, name='login'), 
@@ -32,6 +34,8 @@ urlpatterns = [
     path('horarios/excluir/<int:horario_id>/', horarios_excluir, name='horarios_excluir'),
     path('buscar-dias-relacionados/', buscar_dias_relacionados, name='buscar_dias_relacionados'),
     path('horarios_disciplinas/', horarioDisciplina, name='horarios_disciplinas'),
+    path('gerar_horarios/', gerarHorarios, name='gerar_horarios'),
+
 
      
      ] 

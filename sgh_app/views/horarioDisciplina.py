@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from sgh_app.models.horarios_disciplinas import HorariosDisciplinas
 from sgh_app.models.horario_curso import HorarioCurso
+from sgh_app.models.semestre import Semestre  # Certifique-se de que este import está correto
 
 @login_required
 def horarioDisciplina(request):
@@ -27,7 +28,11 @@ def horarioDisciplina(request):
         horario_curso__curso=curso  # Filtra pelos horários do curso
     )
 
+    # Buscando todos os semestres
+    semestres = Semestre.objects.all()  # Certifique-se de que o modelo Semestre está correto
+
     context = {
         'horarios_disciplinas': horarios_disciplinas,
+        'semestres': semestres,  # Adicionando a lista de semestres ao contexto
     }
     return render(request, 'horarios/horarios_disciplinas.html', context)
