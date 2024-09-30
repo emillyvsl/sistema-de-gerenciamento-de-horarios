@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Horários das Disciplinas{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Quadro de Horários - Ano: {{ horarios_disciplinas.0.ano_semestre }}</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Horário</th>
+                                <th>Disciplina</th>
+                                <th>Professor</th>
+                                <th>Dias da Semana</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for horario in horarios_disciplinas %}
+                                <tr>
+                                    <td>{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
+                                    <td>{{ horario.disciplina_professor.disciplina.nome }}</td>
+                                    <td>{{ horario.disciplina_professor.professor.nome }}</td>
+                                    <td>
+                                        {% for dia in horario.horario_curso.dias_semana.all %}
+                                            {{ dia.nome }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

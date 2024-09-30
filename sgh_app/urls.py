@@ -3,6 +3,7 @@ from django.urls import path
 from sgh_app.views.detalhesProfessor import detalhes_professor
 from sgh_app.views.disciplinaProfessor import adicionar_disciplina_professor, remover_disciplina_professor
 from sgh_app.views.disciplinas import editar_disciplina, excluir_disciplina, listar_disciplinas
+from sgh_app.views.horarioDisciplina import horarioDisciplina
 from sgh_app.views.preferenciaProfessor import adicionar_preferencia_professor, buscar_dias_relacionados, remover_preferencia_professor
 from .views.auth_views import login, user_logout, registro
 from .views.professor_views import editar_professor, excluir_professor, listar_professores
@@ -30,5 +31,7 @@ urlpatterns = [
     path('horarios/editar/<int:horario_id>/', horarios_editar, name='horarios_editar'),
     path('horarios/excluir/<int:horario_id>/', horarios_excluir, name='horarios_excluir'),
     path('buscar-dias-relacionados/', buscar_dias_relacionados, name='buscar_dias_relacionados'),
+    path('horarios_disciplinas/', horarioDisciplina, name='horarios_disciplinas'),
+
      
      ] 

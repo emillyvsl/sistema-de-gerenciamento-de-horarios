@@ -1,7 +1,9 @@
 from django.contrib import admin
 
+from sgh_app.models.ano_semestre import AnoSemestre
 from sgh_app.models.dias_semana import DiasSemana
 from sgh_app.models.horario_curso import HorarioCurso
+from sgh_app.models.horarios_disciplinas import HorariosDisciplinas
 from sgh_app.models.preferencias import Preferencias
 from .models import Centro, Curso, Coordenacao, Periodo, Semestre
 
@@ -37,6 +39,26 @@ class PreferenciasAdmin(admin.ModelAdmin):
         return ', '.join([hora.__str__() for hora in obj.horas_preferidas.all()])
     get_horas_preferidas.short_description = 'Horas Preferidas'
 
+
+class HorariosDisciplinasAdmin(admin.ModelAdmin):
+    list_display = ('get_disciplina', 'get_professor', 'horario_curso', 'ano_semestre')
+    search_fields = ('disciplina_professor__disciplina__nome', 'disciplina_professor__professor__nome')
+    list_filter = ('horario_curso__curso', 'ano_semestre')
+
+    def get_disciplina(self, obj):
+        return obj.disciplina_professor.disciplina.nome
+    get_disciplina.short_description = 'Disciplina'
+
+    def get_professor(self, obj):
+        return obj.disciplina_professor.professor.nome
+    get_professor.short_description = 'Professor'
+
+
+class AnoSemestreAdmin(admin.ModelAdmin):
+    list_display = ('ano', 'semestre')  # Campos que serão exibidos na listagem
+    search_fields = ('ano',)  # Campos que podem ser pesquisados
+    list_filter = ('semestre',)  # Campos pelos quais é possível filtrar 
+
 admin.site.register(Centro)
 admin.site.register(Curso, CursoAdmin)
 admin.site.register(Coordenacao)
@@ -45,3 +67,6 @@ admin.site.register(Semestre)
 admin.site.register(DiasSemana, DiasSemanaAdmin)
 admin.site.register(HorarioCurso, HorarioCursoAdmin)
 admin.site.register(Preferencias, PreferenciasAdmin)
+admin.site.register(HorariosDisciplinas, HorariosDisciplinasAdmin)
+admin.site.register(AnoSemestre, AnoSemestreAdmin)
+

@@ -13,6 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist
 def horarios_curso(request):
     return render(request, 'horarios/horario_curso.html')
 
+@login_required
 def horarios_adicionar(request):
     # Obtendo o curso a partir da coordenação do usuário logado
     coordenacao = request.user.coordenacao
@@ -27,17 +28,18 @@ def horarios_adicionar(request):
         # Obtém os objetos DiasSemana pelos IDs selecionados
         dias = DiasSemana.objects.filter(id__in=dias_ids)
         
-        # Cria um novo HorarioCurso associado ao curso do coordenador
-        novo_horario = HorarioCurso.objects.create(
-            curso=curso,
-            hora_inicio=hora_inicio,
-            hora_fim=hora_fim
-        )
-        
-        # Adiciona os dias da semana selecionados
-        novo_horario.dias_semana.set(dias)
-        novo_horario.save()
+        # Cria um novo HorarioCurso para cada dia selecionado
+        for dia in dias:
+            novo_horario = HorarioCurso.objects.create(
+                curso=curso,
+                hora_inicio=hora_inicio,
+                hora_fim=hora_fim
+            )
+            # Adiciona o dia da semana selecionado
+            novo_horario.dias_semana.set([dia])
+            novo_horario.save()
 
+        messages.success(request, 'Horários adicionados com sucesso!')
         return redirect('horarios_adicionar')
 
     # Para requisições GET, renderizamos a tabela com horários
@@ -55,6 +57,7 @@ def horarios_adicionar(request):
         'horarios_por_dia': dict(horarios_por_dia),
         'curso': curso
     })
+
 
 @login_required
 def horarios_editar(request, horario_id):
