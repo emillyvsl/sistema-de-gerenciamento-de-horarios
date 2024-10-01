@@ -24,6 +24,11 @@ def gerar_horarios(request):
         ano = request.POST['ano']
         semestre_id = request.POST['semestre']
 
+        # Verifica se o ano e semestre já foram cadastrados
+        if AnoSemestre.objects.filter(ano=ano, semestre_id=semestre_id).exists():
+            messages.error(request, 'Esse ano já foi cadastrado neste semestre.')
+            return redirect('gerar_horarios')  # Redireciona de volta ao formulário
+
         # Cadastrando o novo ano e semestre
         semestre = Semestre.objects.get(id=semestre_id)
         ano_semestre = AnoSemestre.objects.create(ano=ano, semestre=semestre)
@@ -33,7 +38,7 @@ def gerar_horarios(request):
 
         for curso in cursos:
             # Criando um horário de disciplinas padrão
-            horarios_disciplinas = HorariosDisciplinas.objects.create(
+            HorariosDisciplinas.objects.create(
                 horario_curso=curso,
                 ano_semestre=ano_semestre,
                 disciplina_professor=None  # A disciplina_professor pode ser nula inicialmente
@@ -45,6 +50,7 @@ def gerar_horarios(request):
     return render(request, 'horarios/gerar_horarios.html', {
         'semestres': semestres,  # Adiciona a lista de semestres ao contexto
     })
+
 
 
 

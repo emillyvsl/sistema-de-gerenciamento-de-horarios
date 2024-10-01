@@ -13,7 +13,7 @@
             <label for="semestre">Semestre</label>
             <select class="form-control" id="semestre" name="semestre" required>
                 {% for semestre in semestres %}
-                <option value="{{ semestre.id }}">{{ semestre.nome }}</option>
+                        <option value="{{ semestre.id }}">{{ semestre.get_nome_display }}</option>
                 {% endfor %}
             </select>
         </div>
