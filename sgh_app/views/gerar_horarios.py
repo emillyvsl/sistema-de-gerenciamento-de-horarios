@@ -1,35 +1,62 @@
-from django.shortcuts import render
-from django.db import IntegrityError
+# gerar_horario.py
+
+from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 from sgh_app.models.ano_semestre import AnoSemestre
 from sgh_app.models.horario_curso import HorarioCurso
 from sgh_app.models.horarios_disciplinas import HorariosDisciplinas
+from sgh_app.models.semestre import Semestre
 
-def gerarHorarios(request):
+@login_required
+def gerenciar_horarios(request):
+    # Listando todos os anos e semestres cadastrados
+    anos_semestres = AnoSemestre.objects.all()
+    return render(request, 'gerenciar_horarios.html', {
+        'anos_semestres': anos_semestres
+    })
+
+@login_required
+def gerar_horarios(request):
+    semestres = Semestre.objects.all()  # Obtenha todos os semestres do banco de dados
     if request.method == 'POST':
-        # Tente obter o AnoSemestre
-        ano_semestre = AnoSemestre.objects.filter(id=1).first()  # Use filter e first para evitar o erro
-        if not ano_semestre:
-            # Lide com o caso onde o AnoSemestre não existe
-            print("AnoSemestre não encontrado.")
-            return render(request, 'template.html', {'error': 'AnoSemestre não encontrado.'})
+        ano = request.POST['ano']
+        semestre_id = request.POST['semestre']
 
-        # Tente obter o HorarioCurso (substitua o ID conforme necessário)
-        horario_curso = HorarioCurso.objects.filter(id=1).first()  # Use filter e first aqui também
-        if not horario_curso:
-            print("HorarioCurso não encontrado.")
-            return render(request, 'template.html', {'error': 'HorarioCurso não encontrado.'})
+        # Cadastrando o novo ano e semestre
+        semestre = Semestre.objects.get(id=semestre_id)
+        ano_semestre = AnoSemestre.objects.create(ano=ano, semestre=semestre)
 
-        # Crie o objeto HorariosDisciplinas permitindo disciplina_professor como nulo
-        novo_horario = HorariosDisciplinas(
-            disciplina_professor=None,
-            horario_curso=horario_curso,
-            ano_semestre=ano_semestre
-        )
+        # Gerar horários para todos os cursos disponíveis
+        cursos = HorarioCurso.objects.filter(curso__isnull=False).distinct()  # Aqui, filtramos os cursos
 
-        try:
-            novo_horario.save()
-        except IntegrityError as e:
-            print(f'Erro ao salvar: {e}')
+        for curso in cursos:
+            # Criando um horário de disciplinas padrão
+            horarios_disciplinas = HorariosDisciplinas.objects.create(
+                horario_curso=curso,
+                ano_semestre=ano_semestre,
+                disciplina_professor=None  # A disciplina_professor pode ser nula inicialmente
+            )
 
-    return render(request, 'template.html')
+        messages.success(request, 'Ano e semestre cadastrados com sucesso!')
+        return redirect('quadro_horarios', ano_semestre_id=ano_semestre.id)
+
+    return render(request, 'horarios/gerar_horarios.html', {
+        'semestres': semestres,  # Adiciona a lista de semestres ao contexto
+    })
+
+
+
+@login_required
+def quadro_horarios(request, ano_semestre_id):
+    ano_semestre = get_object_or_404(AnoSemestre, id=ano_semestre_id)
+    # Filtrando os horários de disciplinas com prefetch_related para dias_semana
+    horarios = HorariosDisciplinas.objects.filter(ano_semestre=ano_semestre).select_related(
+        'disciplina_professor__disciplina', 
+        'disciplina_professor__professor'
+    ).prefetch_related('horario_curso__dias_semana')  # Usando prefetch_related
+
+    return render(request, 'horarios/horarios_disciplinas.html', {
+        'horarios': horarios,
+    })

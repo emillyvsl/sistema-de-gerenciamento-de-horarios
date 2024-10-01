@@ -46,11 +46,19 @@ class HorariosDisciplinasAdmin(admin.ModelAdmin):
     list_filter = ('horario_curso__curso', 'ano_semestre')
 
     def get_disciplina(self, obj):
-        return obj.disciplina_professor.disciplina.nome
+        # Verifica se disciplina_professor existe antes de acessar disciplina
+        if obj.disciplina_professor and obj.disciplina_professor.disciplina:
+            return obj.disciplina_professor.disciplina.nome
+        return "Sem disciplina"  # Retorna um valor padrão se não houver disciplina
+
     get_disciplina.short_description = 'Disciplina'
 
     def get_professor(self, obj):
-        return obj.disciplina_professor.professor.nome
+        # Verifica se disciplina_professor existe antes de acessar professor
+        if obj.disciplina_professor and obj.disciplina_professor.professor:
+            return obj.disciplina_professor.professor.nome
+        return "Sem professor"  # Retorna um valor padrão se não houver professor
+
     get_professor.short_description = 'Professor'
 
 
