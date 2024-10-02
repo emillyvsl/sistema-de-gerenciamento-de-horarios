@@ -1,24 +1,33 @@
-<!-- gerar_horarios.html -->
 {% extends 'base.html' %}
+
 {% block content %}
-<div class="container">
-   
-    <h2>Gerar Horários</h2>
     <form method="POST">
         {% csrf_token %}
-        <div class="form-group">
-            <label for="ano">Ano</label>
-            <input type="number" class="form-control" id="ano" name="ano" required>
-        </div>
-        <div class="form-group">
-            <label for="semestre">Semestre</label>
-            <select class="form-control" id="semestre" name="semestre" required>
-                {% for semestre in semestres %}
-                        <option value="{{ semestre.id }}">{{ semestre.get_nome_display }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Salvar</button>
+        <label for="ano">Ano:</label>
+        <input type="text" name="ano" id="ano" required>
+
+        <label for="semestre">Semestre:</label>
+        <select name="semestre" id="semestre" required>
+            {% for semestre in semestres %}
+                <option value="{{ semestre.id }}">{{ semestre.nome }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="periodo">Período:</label>
+        <select name="periodo" id="periodo" required>
+            <option value="par">Par</option>
+            <option value="impar">Ímpar</option>
+        </select>
+
+        <button type="submit">Gerar Horários</button>
     </form>
-</div>
+
+    {% if periodo_opcoes %}
+        <h3>Períodos disponíveis:</h3>
+        <ul>
+            {% for periodo in periodo_opcoes %}
+                <li>{{ periodo }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 {% endblock %}

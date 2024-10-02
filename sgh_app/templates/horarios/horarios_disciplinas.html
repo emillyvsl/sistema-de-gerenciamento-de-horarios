@@ -1,9 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container">
-
-    
-
     <form method="GET" action="">
         <div class="row">
             <div class="col-md-6">
@@ -38,10 +35,10 @@
         <thead>
             <tr>
                 <th>Disciplina</th>
-
                 <th>Horário</th>
                 <th>Dias da Semana</th>
-                <th>Ações</th>
+                <th>Período</th>  <!-- Nova coluna -->
+                
             </tr>
         </thead>
         <tbody>
@@ -61,6 +58,7 @@
                             {{ dia.nome }}{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </td>
+                    <td>{{ horario.periodo }}</td>  <!-- Mostrar o período correspondente -->
                     <td>
                         <!-- Adicione outras ações se necessário -->
                     </td>
@@ -68,10 +66,11 @@
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="7">Nenhum horário encontrado.</td>
+                    <td colspan="5">Nenhum horário encontrado.</td>
                 </tr>
             {% endif %}
         </tbody>
+        
     </table>
 
     <!-- Botão para gerar novo horário -->

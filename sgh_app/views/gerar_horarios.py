@@ -29,9 +29,12 @@ from sgh_app.models.semestre import Semestre
 @login_required
 def gerar_horarios(request):
     semestres = Semestre.objects.all()  # Obtenha todos os semestres do banco de dados
+    periodo_opcoes = []  # Variável para armazenar as opções de período
+
     if request.method == 'POST':
         ano = request.POST['ano']
         semestre_id = request.POST['semestre']
+        periodo = request.POST['periodo']  # Capturando o período selecionado
 
         # Verifica se o ano e semestre já foram cadastrados
         if AnoSemestre.objects.filter(ano=ano, semestre_id=semestre_id).exists():
@@ -51,12 +54,18 @@ def gerar_horarios(request):
 
         # Gerar horários para todos os horários do curso
         horarios_curso = HorarioCurso.objects.filter(curso=curso)
+
+        # Adicionar lógica para calcular os períodos pares
+        if periodo == 'par':
+            periodo_opcoes = [p for p in range(1, curso.quantidade_periodos + 1) if p % 2 == 0]
+
         for horario_curso in horarios_curso:
             # Criando um horário de disciplinas padrão
             HorariosDisciplinas.objects.create(
                 horario_curso=horario_curso,
                 ano_semestre=ano_semestre,
-                disciplina_professor=None  # A disciplina_professor pode ser nula inicialmente
+                disciplina_professor=None,  # A disciplina_professor pode ser nula inicialmente
+                periodo=periodo  # Salvando o período selecionado
             )
 
         messages.success(request, 'Ano e semestre cadastrados com sucesso!')
@@ -65,7 +74,9 @@ def gerar_horarios(request):
 
     return render(request, 'horarios/gerar_horarios.html', {
         'semestres': semestres,  # Adiciona a lista de semestres ao contexto
+        'periodo_opcoes': periodo_opcoes,  # Passa as opções de período para o template
     })
+
 
 
 
