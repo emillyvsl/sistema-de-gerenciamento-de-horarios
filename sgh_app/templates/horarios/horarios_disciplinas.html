@@ -2,15 +2,17 @@
 {% block content %}
 <div class="container">
 
-      <form method="GET" action="">
+    <form method="GET" action="">
         <div class="row">
             <div class="col-md-6">
                 <label for="ano">Ano:</label>
-                <input type="number" id="ano" name="ano" class="form-control" value="{{ request.GET.ano }}">
+                <input type="number" id="ano" name="ano" class="form-control" 
+                       placeholder="Informe o Ano" value="{{ request.GET.ano }}">
             </div>
             <div class="col-md-6">
                 <label for="semestre">Semestre:</label>
                 <select id="semestre" name="semestre" class="form-control">
+                    <option value="" disabled selected>Informe o Semestre</option>
                     {% for semestre in semestres %}
                         <option value="{{ semestre.id }}">{{ semestre.get_nome_display }}</option>
                     {% endfor %}
@@ -27,13 +29,14 @@
         {% endwith %}
     {% else %}
         <h2>Quadro de Horários</h2>
+        <p>Nenhum horário encontrado para o último semestre.</p>
     {% endif %}
 
     <table class="table">
         <thead>
             <tr>
                 <th>Disciplina</th>
-                <th>Professor</th>
+
                 <th>Horário</th>
                 <th>Dias da Semana</th>
                 <th>Ações</th>
@@ -43,9 +46,13 @@
             {% if horarios %}
                 {% for horario in horarios %}
                 <tr>
-                    
-                    <td>{{ horario.disciplina_professor.disciplina.nome }}</td>
-                    <td>{{ horario.disciplina_professor.professor.nome }}</td>
+                    <td>
+                        {% if horario.disciplina_professor %}
+                            {{ horario.disciplina_professor.disciplina.nome }}
+                        {% else %}
+                            Sem disciplina
+                        {% endif %}
+                    </td>
                     <td>{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
                     <td>
                         {% for dia in horario.horario_curso.dias_semana.all %}

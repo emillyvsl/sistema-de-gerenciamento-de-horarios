@@ -23,31 +23,33 @@ def horarioDisciplina(request):
     ano = request.GET.get('ano')
     semestre_id = request.GET.get('semestre')
 
+    # Buscar horários
     horarios = HorariosDisciplinas.objects.filter(
         horario_curso__curso=curso
     ).select_related(
         'disciplina_professor__disciplina',
         'disciplina_professor__professor',
-        'ano_semestre'
-    )
+        'ano_semestre',
+        'horario_curso'
+    ).prefetch_related('horario_curso__dias_semana')
 
     if ano:
         horarios = horarios.filter(ano_semestre__ano=ano)
-
     if semestre_id:
         horarios = horarios.filter(ano_semestre__semestre_id=semestre_id)
 
-    # Obter os anos e semestres disponíveis para exibir
-    anos_semestres = HorarioCurso.objects.filter(curso=curso).distinct()
-
-    # Variável que indica se a pesquisa foi realizada
-    pesquisa_realizada = bool(ano or semestre_id)
+    # Caso não haja filtro, pegar o quadro mais recente
+    if not ano and not semestre_id:
+        ultimo_ano_semestre = AnoSemestre.objects.latest('ano', 'semestre')
+        horarios = horarios.filter(ano_semestre=ultimo_ano_semestre)
+        pesquisa_realizada = False  # Não foi realizada pesquisa
+    else:
+        pesquisa_realizada = True
 
     context = {
-        'anos_semestres': anos_semestres,
         'horarios': horarios,
-        'semestres': semestres,  # Envia os semestres para o template
-        'pesquisa_realizada': pesquisa_realizada,  # Nova variável
+        'semestres': semestres,
+        'pesquisa_realizada': pesquisa_realizada,
     }
 
     return render(request, 'horarios/horarios_disciplinas.html', context)

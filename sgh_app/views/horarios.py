@@ -3,10 +3,13 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from sgh_app.models.ano_semestre import AnoSemestre
 from sgh_app.models.dias_semana import DiasSemana
 from sgh_app.models.horario_curso import HorarioCurso
 from collections import defaultdict
 from django.core.exceptions import ObjectDoesNotExist
+
+from sgh_app.models.horarios_disciplinas import HorariosDisciplinas
 
 
 @login_required
@@ -15,38 +18,45 @@ def horarios_curso(request):
 
 @login_required
 def horarios_adicionar(request):
-    # Obtendo o curso a partir da coordenação do usuário logado
     coordenacao = request.user.coordenacao
     curso = coordenacao.curso
 
-    # Se for uma requisição POST, processamos o formulário
     if request.method == 'POST':
         dias_ids = request.POST.getlist('dias_semana')
         hora_inicio = request.POST['hora_inicio']
         hora_fim = request.POST['hora_fim']
         
-        # Obtém os objetos DiasSemana pelos IDs selecionados
         dias = DiasSemana.objects.filter(id__in=dias_ids)
-        
-        # Cria um novo HorarioCurso para cada dia selecionado
+
+        # Obtenha o ano e semestre atual
+        try:
+            ano_semestre = AnoSemestre.objects.latest('ano', 'semestre')
+        except ObjectDoesNotExist:
+            messages.error(request, 'Ano e semestre não definidos.')
+            return redirect('horarios_adicionar')
+
         for dia in dias:
             novo_horario = HorarioCurso.objects.create(
                 curso=curso,
                 hora_inicio=hora_inicio,
                 hora_fim=hora_fim
             )
-            # Adiciona o dia da semana selecionado
             novo_horario.dias_semana.set([dia])
             novo_horario.save()
 
-        messages.success(request, 'Horários adicionados com sucesso!')
+            # Cria uma nova entrada em HorariosDisciplinas associada ao HorarioCurso e AnoSemestre
+            HorariosDisciplinas.objects.create(
+                horario_curso=novo_horario,
+                ano_semestre=ano_semestre,
+                disciplina_professor=None  # Você pode definir isso depois se necessário
+            )
+
+        messages.success(request, 'Horários e quadro de horários adicionados com sucesso!')
         return redirect('horarios_adicionar')
 
-    # Para requisições GET, renderizamos a tabela com horários
     dias = DiasSemana.objects.all()
     horarios_curso = HorarioCurso.objects.filter(curso=curso)
 
-    # Organizando horários por dia da semana
     horarios_por_dia = defaultdict(list)
     for horario in horarios_curso:
         for dia in horario.dias_semana.all():
@@ -76,6 +86,12 @@ def horarios_excluir(request, horario_id):
     horario = get_object_or_404(HorarioCurso, id=horario_id)
     
     if request.method == 'POST':
+        # Remover as entradas em HorariosDisciplinas associadas a esse HorarioCurso
+        HorariosDisciplinas.objects.filter(horario_curso=horario).delete()
+        
+        # Excluir o HorarioCurso
         horario.delete()
-        messages.success(request, 'Horário removido com sucesso!')
-        return redirect('horarios_adicionar')  # Redireciona para a lista de horários
+
+        messages.success(request, 'Horário e quadro de horários removidos com sucesso!')
+        return redirect('horarios_adicionar')
+

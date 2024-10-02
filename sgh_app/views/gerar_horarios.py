@@ -17,6 +17,15 @@ def gerenciar_horarios(request):
         'anos_semestres': anos_semestres
     })
 
+from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+
+from sgh_app.models.ano_semestre import AnoSemestre
+from sgh_app.models.horario_curso import HorarioCurso
+from sgh_app.models.horarios_disciplinas import HorariosDisciplinas
+from sgh_app.models.semestre import Semestre
+
 @login_required
 def gerar_horarios(request):
     semestres = Semestre.objects.all()  # Obtenha todos os semestres do banco de dados
@@ -33,24 +42,30 @@ def gerar_horarios(request):
         semestre = Semestre.objects.get(id=semestre_id)
         ano_semestre = AnoSemestre.objects.create(ano=ano, semestre=semestre)
 
-        # Gerar horários para todos os cursos disponíveis
-        cursos = HorarioCurso.objects.filter(curso__isnull=False).distinct()  # Aqui, filtramos os cursos
+        # Obter o curso associado à coordenação do usuário
+        coordenacao = request.user.coordenacao
+        if not coordenacao:
+            messages.error(request, "Acesso negado: você não possui coordenação associada.")
+            return redirect('home')
+        curso = coordenacao.curso
 
-        for curso in cursos:
+        # Gerar horários para todos os horários do curso
+        horarios_curso = HorarioCurso.objects.filter(curso=curso)
+        for horario_curso in horarios_curso:
             # Criando um horário de disciplinas padrão
             HorariosDisciplinas.objects.create(
-                horario_curso=curso,
+                horario_curso=horario_curso,
                 ano_semestre=ano_semestre,
                 disciplina_professor=None  # A disciplina_professor pode ser nula inicialmente
             )
 
         messages.success(request, 'Ano e semestre cadastrados com sucesso!')
-        return redirect('quadro_horarios', ano_semestre_id=ano_semestre.id)
+        # Redirecionar para a tela de horários
+        return redirect('horarios_disciplinas')  # Redireciona para a listagem geral
 
     return render(request, 'horarios/gerar_horarios.html', {
         'semestres': semestres,  # Adiciona a lista de semestres ao contexto
     })
-
 
 
 
