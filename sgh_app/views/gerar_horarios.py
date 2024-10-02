@@ -35,7 +35,7 @@ def gerar_horarios(request):
 
         # Verifica se o ano e semestre já foram cadastrados
         if AnoSemestre.objects.filter(ano=ano, semestre_id=semestre_id).exists():
-            messages.error(request, 'Esse ano já foi cadastrado neste semestre.')
+            messages.warning(request, "Esse ano já foi cadastrado neste semestre.")
             return redirect('gerar_horarios')  # Redireciona de volta ao formulário
 
         # Cadastrando o novo ano e semestre

@@ -23,7 +23,7 @@ def horarioDisciplina(request):
     ano = request.GET.get('ano')
     semestre_id = request.GET.get('semestre')
 
-    # Buscar horários
+    # Inicializar horários com os horários relacionados ao curso
     horarios = HorariosDisciplinas.objects.filter(
         horario_curso__curso=curso
     ).select_related(
@@ -33,18 +33,18 @@ def horarioDisciplina(request):
         'horario_curso'
     ).prefetch_related('horario_curso__dias_semana')
 
-    if ano:
-        horarios = horarios.filter(ano_semestre__ano=ano)
-    if semestre_id:
-        horarios = horarios.filter(ano_semestre__semestre_id=semestre_id)
-
-    # Caso não haja filtro, pegar o quadro mais recente
-    if not ano and not semestre_id:
+    # Verificando se ambos ano e semestre foram selecionados
+    if ano and semestre_id:
+        horarios = horarios.filter(ano_semestre__ano=ano, ano_semestre__semestre_id=semestre_id)
+        pesquisa_realizada = True  # Pesquisa foi realizada
+    else:
+        # Caso não haja filtros, pegar o quadro mais recente
         ultimo_ano_semestre = AnoSemestre.objects.latest('ano', 'semestre')
         horarios = horarios.filter(ano_semestre=ultimo_ano_semestre)
         pesquisa_realizada = False  # Não foi realizada pesquisa
-    else:
-        pesquisa_realizada = True
+
+        # Mensagem para informar que o quadro mais recente está sendo exibido
+        messages.warning(request, "Para pesquisar deve ser selecionado o ano e o semestre. Exibindo o quadro mais recente.")
 
     context = {
         'horarios': horarios,
