@@ -8,15 +8,16 @@
 
         <label for="semestre">Semestre:</label>
         <select name="semestre" id="semestre" required>
+            <option value="" disabled selected>Selecione um semestre</option>
             {% for semestre in semestres %}
-                <option value="{{ semestre.id }}">{{ semestre.nome }}</option>
+                <option value="{{ semestre.id }}">{{ semestre.get_nome_display }}</option>
             {% endfor %}
         </select>
 
-        <label for="periodo">Período:</label>
-        <select name="periodo" id="periodo" required>
-            <option value="par">Par</option>
-            <option value="impar">Ímpar</option>
+        <label for="paridade">Escolha o tipo de período:</label>
+        <select name="paridade" id="paridade" required>
+            <option value="par">Pares</option>
+            <option value="impar">Ímpares</option>
         </select>
 
         <button type="submit">Gerar Horários</button>
@@ -26,7 +27,7 @@
         <h3>Períodos disponíveis:</h3>
         <ul>
             {% for periodo in periodo_opcoes %}
-                <li>{{ periodo }}</li>
+                <li>{{ periodo }}</li>  <!-- Aqui o período é um número -->
             {% endfor %}
         </ul>
     {% endif %}

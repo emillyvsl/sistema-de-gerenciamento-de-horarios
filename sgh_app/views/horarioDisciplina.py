@@ -25,7 +25,6 @@ def horarioDisciplina(request):
     semestre_id = request.GET.get('semestre')
     periodo_escolhido = request.GET.get('periodo')  # Capturando o período escolhido
 
-
     # Inicializar horários com os horários relacionados ao curso
     horarios = HorariosDisciplinas.objects.filter(
         horario_curso__curso=curso
@@ -42,9 +41,9 @@ def horarioDisciplina(request):
 
         # Filtrar períodos pares ou ímpares, dependendo da escolha do usuário
         if periodo_escolhido == 'par':
-            horarios = horarios.filter(periodo__in=[p for p in range(1, curso.numero_periodos + 1) if p % 2 == 0])
+            horarios = horarios.filter(periodo__in=[p for p in range(2, curso.numero_periodos + 1, 2)])
         elif periodo_escolhido == 'impar':
-            horarios = horarios.filter(periodo__in=[p for p in range(1, curso.numero_periodos + 1) if p % 2 != 0])
+            horarios = horarios.filter(periodo__in=[p for p in range(1, curso.numero_periodos + 1, 2)])
 
         pesquisa_realizada = True  # Pesquisa foi realizada
     else:
