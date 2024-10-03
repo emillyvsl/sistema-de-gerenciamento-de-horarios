@@ -34,40 +34,45 @@
     <table class="table">
     <thead>
         <tr>
-            <th>Disciplina</th>
-            <th>Horário</th>
+            <th>Período</th>
+            <th>Disciplina(s)</th>
+            <th>Horário(s)</th>
             <th>Dias da Semana</th>
-            <th>Período</th>  <!-- Nova coluna -->
         </tr>
     </thead>
     <tbody>
         {% if horarios %}
-            {% for horario in horarios %}
-            <tr>
-                <td>
-                    {% if horario.disciplina_professor %}
-                        {{ horario.disciplina_professor.disciplina.nome }}
-                    {% else %}
-                        Sem disciplina
+            {% regroup horarios|dictsort:"periodo" by periodo as periodos_grouped %}
+
+            {% for periodo in periodos_grouped %}
+                {% for horario in periodo.list %}
+                <tr>
+                    {% if forloop.first %}
+                    <td rowspan="{{ periodo.list|length }}">{{ periodo.grouper }}</td> <!-- Mesclando células do período -->
                     {% endif %}
-                </td>
-                <td>{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
-                <td>
-                    {% for dia in horario.horario_curso.dias_semana.all %}
-                        {{ dia.nome }}{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                </td>
-                <td>{{ horario.periodo }}</td>  <!-- Exibir o número do período correto -->
-            </tr>
+                    <td>
+                        {% if horario.disciplina_professor %}
+                            {{ horario.disciplina_professor.disciplina.nome }}
+                        {% else %}
+                            Sem disciplina
+                        {% endif %}
+                    </td>
+                    <td>{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
+                    <td>
+                        {% for dia in horario.horario_curso.dias_semana.all %}
+                            {{ dia.nome }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
             {% endfor %}
         {% else %}
             <tr>
-                <td colspan="5">Nenhum horário encontrado.</td>
+                <td colspan="4">Nenhum horário encontrado.</td>
             </tr>
         {% endif %}
     </tbody>
 </table>
-
 
     <!-- Botão para gerar novo horário -->
     <a href="{% url 'gerar_horarios' %}" class="btn btn-primary">Gerar Horários</a>
