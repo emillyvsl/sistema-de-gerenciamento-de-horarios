@@ -10,3 +10,4 @@ from .dias_semana import DiasSemana
 from .horario_curso import HorarioCurso
 from .preferencias import Preferencias
 from .horarios_disciplinas import HorariosDisciplinas
+from .ano_semestre import AnoSemestre
