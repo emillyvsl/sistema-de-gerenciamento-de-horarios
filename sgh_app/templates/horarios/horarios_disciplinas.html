@@ -35,7 +35,6 @@
     <thead>
         <tr>
             <th>Período</th>
-            <th>Disciplina(s)</th>
             <th>Horário(s)</th>
             <!-- Exibir os dias da semana no cabeçalho -->
             {% for dia in dias_semana %}
@@ -53,22 +52,20 @@
                     {% if forloop.first %}
                     <td rowspan="{{ periodo.list|length }}">{{ periodo.grouper }}</td> <!-- Mesclando células do período -->
                     {% endif %}
-                    <td>
-                        {% if horario.disciplina_professor %}
-                            {{ horario.disciplina_professor.disciplina.nome }}
-                        {% else %}
-                            Sem disciplina
-                        {% endif %}
-                    </td>
                     <td>{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
                     
-                    <!-- Verificar se o horário tem relação com os dias da semana e exibir um ícone -->
+                    <!-- Alocar disciplinas nas células de acordo com os dias da semana -->
                     {% for dia in dias_semana %}
                         <td>
                             {% if dia in horario.horario_curso.dias_semana.all %}
-                                ✔ <!-- Ícone ou texto indicando que há aula nesse dia -->
+                                {% if horario.disciplina_professor %}
+                                    {{ horario.disciplina_professor.disciplina.nome }}<br>
+                                    {{ horario.disciplina_professor.professor.nome }}
+                                {% else %}
+                                    Sem disciplinas
+                                {% endif %}
                             {% else %}
-                                <!-- Célula vazia se não houver relação -->
+                                <!-- Célula vazia se não houver aula nesse dia -->
                             {% endif %}
                         </td>
                     {% endfor %}
@@ -78,7 +75,6 @@
         {% else %}
             <tr>
                 <td colspan="{{ colspan_value }}">Nenhum horário encontrado.</td>
-
             </tr>
         {% endif %}
     </tbody>

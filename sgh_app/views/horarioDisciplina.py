@@ -12,6 +12,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from sgh_app.models import DiasSemana, HorariosDisciplinas, Semestre, AnoSemestre
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from sgh_app.models import DiasSemana, HorariosDisciplinas, Semestre, AnoSemestre
+
 @login_required
 def horarioDisciplina(request):
     coordenacao = request.user.coordenacao
@@ -25,10 +30,12 @@ def horarioDisciplina(request):
 
     ano = request.GET.get('ano')
     semestre_id = request.GET.get('semestre')
-    periodo_escolhido = request.GET.get('periodo')
 
     dias_semana = DiasSemana.objects.all()
 
+    pesquisa_realizada = False
+
+    # Inicializa o queryset de horários
     horarios = HorariosDisciplinas.objects.filter(
         horario_curso__curso=curso
     ).select_related(
@@ -45,13 +52,12 @@ def horarioDisciplina(request):
         try:
             ultimo_ano_semestre = AnoSemestre.objects.latest('ano', 'semestre')
             horarios = horarios.filter(ano_semestre=ultimo_ano_semestre)
-            pesquisa_realizada = False
             messages.warning(request, "Para pesquisar deve ser selecionado o ano e o semestre. Exibindo o quadro mais recente.")
         except AnoSemestre.DoesNotExist:
             horarios = None
             messages.warning(request, "Nenhum ano/semestre foi encontrado.")
 
-    # Calcular o valor de colspan
+    # Calcula o colspan para a tabela
     colspan_value = dias_semana.count() + 3
 
     context = {
@@ -59,7 +65,8 @@ def horarioDisciplina(request):
         'semestres': semestres,
         'pesquisa_realizada': pesquisa_realizada,
         'dias_semana': dias_semana,
-        'colspan_value': colspan_value  # Passar o valor calculado para o template
+        'colspan_value': colspan_value
     }
 
     return render(request, 'horarios/horarios_disciplinas.html', context)
+
