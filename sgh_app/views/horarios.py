@@ -60,14 +60,9 @@ def horarios_adicionar(request):
     dias = DiasSemana.objects.all()
     horarios_curso = HorarioCurso.objects.filter(curso=curso)
 
-    horarios_por_dia = defaultdict(list)
-    for horario in horarios_curso:
-        for dia in horario.dias_semana.all():
-            horarios_por_dia[dia.nome].append(horario)
-
     return render(request, 'horarios/horario_adicionar.html', {
         'dias': dias,
-        'horarios_por_dia': dict(horarios_por_dia),
+        'horarios_curso': horarios_curso,
         'curso': curso
     })
 
