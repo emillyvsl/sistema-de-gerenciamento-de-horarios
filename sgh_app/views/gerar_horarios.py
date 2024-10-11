@@ -36,42 +36,37 @@ def gerar_horarios(request):
         semestre_id = request.POST['semestre']
         paridade = request.POST['paridade']
 
-        print(f"Ano: {ano}, Semestre ID: {semestre_id}, Paridade: {paridade}")  # Verificar os dados recebidos no POST
-
-        if AnoSemestre.objects.filter(ano=ano, semestre_id=semestre_id).exists():
-            messages.warning(request, "Esse ano já foi cadastrado neste semestre.")
-            return redirect('gerar_horarios')
-
-        semestre = Semestre.objects.get(id=semestre_id)
-        ano_semestre = AnoSemestre.objects.create(ano=ano, semestre=semestre)
-
         coordenacao = request.user.coordenacao
         if not coordenacao:
             messages.error(request, "Acesso negado: você não possui coordenação associada.")
             return redirect('home')
+        
         curso = coordenacao.curso
 
-        # Gerar opções de período com base na quantidade de períodos
+        # Verificar se o ano e semestre já foram cadastrados para o curso específico
+        if AnoSemestre.objects.filter(ano=ano, semestre_id=semestre_id, curso=curso).exists():
+            messages.warning(request, "Esse ano já foi cadastrado neste semestre para o seu curso.")
+            return redirect('gerar_horarios')
+
+        semestre = Semestre.objects.get(id=semestre_id)
+        ano_semestre = AnoSemestre.objects.create(ano=ano, semestre=semestre, curso=curso)
+
+        # Gerar opções de período com base na quantidade de períodos do curso
         if hasattr(curso, 'quantidade_periodos'):
             for p in range(1, curso.quantidade_periodos + 1):
-                # Filtrar períodos pares ou ímpares, garantindo que 'p' seja sempre um número
                 if (paridade == 'par' and p % 2 == 0) or (paridade == 'impar' and p % 2 != 0):
                     periodo_opcoes.append(p)
-
-        print(f"Períodos disponíveis: {periodo_opcoes}")  # Verificar quais períodos estão sendo gerados
 
         # Gerar horários para todos os horários do curso
         horarios_curso = HorarioCurso.objects.filter(curso=curso)
 
         for horario_curso in horarios_curso:
             for periodo in periodo_opcoes:
-                # Criar horários com o período como número
-                print(f"Criando horário para o período: {periodo}")  # Verificar o período antes de criar
                 HorariosDisciplinas.objects.create(
                     horario_curso=horario_curso,
                     ano_semestre=ano_semestre,
-                    disciplina_professor=None,  # Pode ser nulo inicialmente
-                    periodo=periodo  # Salvando o número do período aqui
+                    disciplina_professor=None,
+                    periodo=periodo
                 )
 
         messages.success(request, 'Ano e semestre cadastrados com sucesso!')
@@ -81,6 +76,7 @@ def gerar_horarios(request):
         'semestres': semestres,
         'periodo_opcoes': periodo_opcoes,
     })
+
 
 
 
