@@ -32,10 +32,8 @@ def horarioDisciplina(request):
     semestre_id = request.GET.get('semestre')
 
     dias_semana = DiasSemana.objects.all()
-
     pesquisa_realizada = False
 
-    # Inicializa o queryset de horários
     horarios = HorariosDisciplinas.objects.filter(
         horario_curso__curso=curso
     ).select_related(
@@ -57,7 +55,9 @@ def horarioDisciplina(request):
             horarios = None
             messages.warning(request, "Nenhum ano/semestre foi encontrado.")
 
-    # Calcula o colspan para a tabela
+    # Debugging
+    print(f"Horários encontrados: {horarios.count() if horarios else 'Nenhum horário encontrado'}")
+
     colspan_value = dias_semana.count() + 3
 
     context = {
@@ -69,4 +69,3 @@ def horarioDisciplina(request):
     }
 
     return render(request, 'horarios/horarios_disciplinas.html', context)
-

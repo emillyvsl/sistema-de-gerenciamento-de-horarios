@@ -26,6 +26,7 @@ def horarios_adicionar(request):
         hora_inicio = request.POST['hora_inicio']
         hora_fim = request.POST['hora_fim']
         
+        # Obtenha os dias selecionados
         dias = DiasSemana.objects.filter(id__in=dias_ids)
 
         # Obtenha o ano e semestre atual
@@ -35,21 +36,23 @@ def horarios_adicionar(request):
             messages.error(request, 'Ano e semestre não definidos.')
             return redirect('horarios_adicionar')
 
-        for dia in dias:
-            novo_horario = HorarioCurso.objects.create(
-                curso=curso,
-                hora_inicio=hora_inicio,
-                hora_fim=hora_fim
-            )
-            novo_horario.dias_semana.set([dia])
-            novo_horario.save()
+        # Crie um único horário para todos os dias selecionados
+        novo_horario = HorarioCurso.objects.create(
+            curso=curso,
+            hora_inicio=hora_inicio,
+            hora_fim=hora_fim
+        )
 
-            # Cria uma nova entrada em HorariosDisciplinas associada ao HorarioCurso e AnoSemestre
-            HorariosDisciplinas.objects.create(
-                horario_curso=novo_horario,
-                ano_semestre=ano_semestre,
-                disciplina_professor=None  # Você pode definir isso depois se necessário
-            )
+        # Associe os dias selecionados ao novo horário
+        novo_horario.dias_semana.set(dias)  # Associa todos os dias de uma vez
+        novo_horario.save()
+
+        # Cria uma nova entrada em HorariosDisciplinas associada ao HorarioCurso e AnoSemestre
+        HorariosDisciplinas.objects.create(
+            horario_curso=novo_horario,
+            ano_semestre=ano_semestre,
+            disciplina_professor=None  # Você pode definir isso depois se necessário
+        )
 
         messages.success(request, 'Horários e quadro de horários adicionados com sucesso!')
         return redirect('horarios_adicionar')
@@ -67,6 +70,7 @@ def horarios_adicionar(request):
         'horarios_por_dia': dict(horarios_por_dia),
         'curso': curso
     })
+
 
 
 @login_required
