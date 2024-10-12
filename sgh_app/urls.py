@@ -1,4 +1,5 @@
 from django.urls import path
+from sgh_app.views.alocarDisciplinas import alocarDisciplina
 from sgh_app.views.detalhesProfessor import detalhes_professor
 from sgh_app.views.disciplinaProfessor import adicionar_disciplina_professor, remover_disciplina_professor
 from sgh_app.views.disciplinas import editar_disciplina, excluir_disciplina, listar_disciplinas
@@ -37,6 +38,7 @@ urlpatterns = [
     path('gerenciar/', gerenciar_horarios, name='gerenciar_horarios'),
     path('gerar/', gerar_horarios, name='gerar_horarios'),
     path('quadro/<int:ano_semestre_id>/', quadro_horarios, name='quadro_horarios'),
+    path('alocar-disciplina/<int:horario_id>/<int:dia_id>/', alocarDisciplina, name='alocar_disciplina'),
 
      
      ] 

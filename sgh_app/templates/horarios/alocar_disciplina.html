@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h2>Alocar Disciplina</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="disciplina_professor">Disciplina:</label>
+            <select id="disciplina_professor" name="disciplina_professor" class="form-control">
+                <option value="" disabled selected>Selecione a Disciplina</option>
+                {% for disciplina_professor in disciplinas_professores %}
+                    <option value="{{ disciplina_professor.id }}">{{ disciplina_professor.disciplina.nome }} - {{ disciplina_professor.professor.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Alocar</button>
+    </form>
+</div>
+{% endblock %}
+<script>
+document.getElementById('alocarDisciplinaForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Impede o envio padrão do formulário
+
+    const formData = new FormData(this);
+
+    fetch("{% url 'alocar_disciplina' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest' // Para identificar a requisição AJAX
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message); // Mensagem de sucesso
+            $('#alocarDisciplinaModal').modal('hide'); // Fecha o modal
+            // Atualize a tabela ou faça qualquer outra ação necessária
+        } else {
+            alert(data.message); // Mensagem de erro
+        }
+    })
+    .catch(error => console.error('Erro:', error));
+});
+</script>

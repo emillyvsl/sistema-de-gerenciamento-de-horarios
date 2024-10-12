@@ -13,7 +13,9 @@
                 <select id="semestre" name="semestre" class="form-control">
                     <option value="" disabled selected>Informe o Semestre</option>
                     {% for semestre in semestres %}
-                        <option value="{{ semestre.id }}">{{ semestre.get_nome_display }}</option>
+                        <option value="{{ semestre.id }}" {% if semestre.id == request.GET.semestre %}selected{% endif %}>
+                            {{ semestre.get_nome_display }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
@@ -32,17 +34,17 @@
     {% endif %}
 
     <table class="table">
-    <thead>
-        <tr>
-            <th>Período</th>
-            <th>Horário(s)</th>
-            <!-- Exibir os dias da semana no cabeçalho -->
-            {% for dia in dias_semana %}
-                <th>{{ dia.nome }}</th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
+        <thead>
+            <tr>
+                <th>Período</th>
+                <th>Horário(s)</th>
+                <!-- Exibir os dias da semana no cabeçalho -->
+                {% for dia in dias_semana %}
+                    <th>{{ dia.nome }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
         {% if horarios %}
             {% regroup horarios|dictsort:"periodo" by periodo as periodos_grouped %}
 
@@ -53,34 +55,42 @@
                     <td rowspan="{{ periodo.list|length }}">{{ periodo.grouper }}</td> <!-- Mesclando células do período -->
                     {% endif %}
                     <td>{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
-                    
+
                     <!-- Alocar disciplinas nas células de acordo com os dias da semana -->
                     {% for dia in dias_semana %}
                         <td>
+                            
+                            <br>
                             {% if dia in horario.horario_curso.dias_semana.all %}
-                                {% if horario.disciplina_professor %}
-                                    {{ horario.disciplina_professor.disciplina.nome }}<br>
-                                    {{ horario.disciplina_professor.professor.nome }}
+                                {% if horario.alocacoes_list %}
+                                    {% for alocacao in horario.alocacoes_list %}
+                                        {{ alocacao.disciplina_professor.disciplina.nome }}<br>
+                                        {{ alocacao.disciplina_professor.professor.nome }}<br>
+                                    {% endfor %}
                                 {% else %}
                                     Sem disciplinas
                                 {% endif %}
+                                <!-- Botão de alocação só aparece se houver relacionamento -->
+                                <a href="{% url 'alocar_disciplina' horario.id dia.id %}" class="btn btn-secondary btn-sm">Alocar Disciplina</a>
                             {% else %}
-                                <!-- Célula vazia se não houver aula nesse dia -->
+                    
                             {% endif %}
                         </td>
                     {% endfor %}
                 </tr>
                 {% endfor %}
             {% endfor %}
+
         {% else %}
             <tr>
                 <td colspan="{{ colspan_value }}">Nenhum horário encontrado.</td>
             </tr>
         {% endif %}
     </tbody>
-</table>
 
-    <!-- Botão para gerar novo horário -->
+    </table>
+
+     <!-- Botão para gerar novo horário -->
     <a href="{% url 'gerar_horarios' %}" class="btn btn-primary">Gerar Horários</a>
 </div>
 {% endblock %}

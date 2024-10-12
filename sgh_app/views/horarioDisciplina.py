@@ -34,6 +34,7 @@ def horarioDisciplina(request):
     dias_semana = DiasSemana.objects.all()
     pesquisa_realizada = False
 
+    # Obter os horários
     horarios = HorariosDisciplinas.objects.filter(
         horario_curso__curso=curso
     ).select_related(
@@ -55,11 +56,16 @@ def horarioDisciplina(request):
             horarios = None
             messages.warning(request, "Nenhum ano/semestre foi encontrado.")
 
+    # Passando as alocações para o contexto
+    if horarios:
+        for horario in horarios:
+            horario.alocacoes_list = horario.alocacoes.all()
+
     # Debugging
     print(f"Horários encontrados: {horarios.count() if horarios else 'Nenhum horário encontrado'}")
 
-    colspan_value = dias_semana.count() + 3
-
+    colspan_value = len(dias_semana) + 2  # Calcular o valor do colspan
+    
     context = {
         'horarios': horarios,
         'semestres': semestres,
