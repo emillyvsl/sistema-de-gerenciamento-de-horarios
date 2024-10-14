@@ -17,14 +17,7 @@ def gerenciar_horarios(request):
         'anos_semestres': anos_semestres
     })
 
-from django.shortcuts import get_object_or_404, render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 
-from sgh_app.models.ano_semestre import AnoSemestre
-from sgh_app.models.horario_curso import HorarioCurso
-from sgh_app.models.horarios_disciplinas import HorariosDisciplinas
-from sgh_app.models.semestre import Semestre
 
 @login_required
 def gerar_horarios(request):

@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from sgh_app.models.alocacao_disciplinas import AlocacaoDisciplinas
 from sgh_app.models.ano_semestre import AnoSemestre
 from sgh_app.models.dias_semana import DiasSemana
 from sgh_app.models.horario_curso import HorarioCurso
@@ -67,6 +68,12 @@ class AnoSemestreAdmin(admin.ModelAdmin):
     search_fields = ('ano',)  # Campos que podem ser pesquisados
     list_filter = ('semestre',)  # Campos pelos quais é possível filtrar 
 
+
+class AlocacaoDisciplinasAdmin(admin.ModelAdmin):
+    list_display = ('horarios_disciplinas', 'disciplina_professor',)  
+    search_fields = ('disciplina_professor__disciplina__nome', 'disciplina_professor__professor__nome',)  
+    list_filter = ('horarios_disciplinas__horario_curso__curso',)  
+
 admin.site.register(Centro)
 admin.site.register(Curso, CursoAdmin)
 admin.site.register(Coordenacao)
@@ -77,4 +84,5 @@ admin.site.register(HorarioCurso, HorarioCursoAdmin)
 admin.site.register(Preferencias, PreferenciasAdmin)
 admin.site.register(HorariosDisciplinas, HorariosDisciplinasAdmin)
 admin.site.register(AnoSemestre, AnoSemestreAdmin)
+admin.site.register(AlocacaoDisciplinas, AlocacaoDisciplinasAdmin)
 

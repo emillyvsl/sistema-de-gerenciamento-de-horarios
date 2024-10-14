@@ -26,7 +26,7 @@
 
     {% if horarios %}
         {% with horario=horarios.0 %}
-            <h2>Quadro de Horários do Semestre {{ horario.ano_semestre.semestre }} do Ano {{ horario.ano_semestre.ano }}</h2>
+            <h2>Quadro de Horários do {{ horario.ano_semestre.semestre }} do Ano {{ horario.ano_semestre.ano }}</h2>
         {% endwith %}
     {% else %}
         <h2>Quadro de Horários</h2>
@@ -38,7 +38,6 @@
             <tr>
                 <th>Período</th>
                 <th>Horário(s)</th>
-                <!-- Exibir os dias da semana no cabeçalho -->
                 {% for dia in dias_semana %}
                     <th>{{ dia.nome }}</th>
                 {% endfor %}
@@ -47,19 +46,16 @@
         <tbody>
         {% if horarios %}
             {% regroup horarios|dictsort:"periodo" by periodo as periodos_grouped %}
-
             {% for periodo in periodos_grouped %}
                 {% for horario in periodo.list %}
                 <tr>
                     {% if forloop.first %}
-                    <td rowspan="{{ periodo.list|length }}">{{ periodo.grouper }}</td> <!-- Mesclando células do período -->
+                    <td rowspan="{{ periodo.list|length }}">{{ periodo.grouper }}</td>
                     {% endif %}
                     <td>{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
 
-                    <!-- Alocar disciplinas nas células de acordo com os dias da semana -->
                     {% for dia in dias_semana %}
                         <td>
-                            
                             <br>
                             {% if dia in horario.horario_curso.dias_semana.all %}
                                 {% if horario.alocacoes_list %}
@@ -70,27 +66,27 @@
                                 {% else %}
                                     Sem disciplinas
                                 {% endif %}
-                                <!-- Botão de alocação só aparece se houver relacionamento -->
-                                <a href="{% url 'alocar_disciplina' horario.id dia.id %}" class="btn btn-secondary btn-sm">Alocar Disciplina</a>
-                            {% else %}
-                    
+
+                                <a href="{% url 'alocar_disciplina' horario.horario_curso.id dia.id %}" class="btn btn-secondary btn-sm">Alocar Disciplina</a>
+
+
+
+
                             {% endif %}
                         </td>
                     {% endfor %}
                 </tr>
                 {% endfor %}
             {% endfor %}
-
         {% else %}
             <tr>
                 <td colspan="{{ colspan_value }}">Nenhum horário encontrado.</td>
             </tr>
         {% endif %}
     </tbody>
-
     </table>
 
-     <!-- Botão para gerar novo horário -->
+    <!-- Botão para gerar novo horário -->
     <a href="{% url 'gerar_horarios' %}" class="btn btn-primary">Gerar Horários</a>
 </div>
 {% endblock %}
