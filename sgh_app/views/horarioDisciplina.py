@@ -9,6 +9,10 @@ from sgh_app.models.semestre import Semestre
 from sgh_app.models.ano_semestre import AnoSemestre
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 @login_required
 def horarioDisciplina(request):
     coordenacao = request.user.coordenacao
@@ -51,10 +55,13 @@ def horarioDisciplina(request):
     ## Passando as alocações para o contexto
     if horarios:
         for horario in horarios:
+            
             # Obter todas as alocações para o HorarioCurso e dia específico
             alocacoes = HorariosDisciplinas.objects.filter(horario_curso=horario.horario_curso)
             horario.alocacoes_list = alocacoes  # Passa todas as alocações desse horário
-
+            
+            # Adicionando log para depuração
+            logger.info(f"Alocações para {horario.horario_curso}: {alocacoes}")
 
     colspan_value = len(dias_semana) + 2  # Calcular o valor do colspan
     
