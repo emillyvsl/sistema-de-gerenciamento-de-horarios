@@ -1,6 +1,7 @@
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from sgh_app.models.dias_semana import DiasSemana
 from sgh_app.models.disciplina_professor import DisciplinaProfessor
 from sgh_app.models.horarios_disciplinas import HorariosDisciplinas
 from sgh_app.models.horario_curso import HorarioCurso
@@ -8,15 +9,6 @@ from sgh_app.models.semestre import Semestre
 from sgh_app.models.ano_semestre import AnoSemestre
 
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from sgh_app.models import DiasSemana, HorariosDisciplinas, Semestre, AnoSemestre
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from sgh_app.models import DiasSemana, HorariosDisciplinas, Semestre, AnoSemestre
 
 @login_required
 def horarioDisciplina(request):
