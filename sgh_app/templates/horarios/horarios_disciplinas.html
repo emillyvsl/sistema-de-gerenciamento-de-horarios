@@ -59,10 +59,11 @@
                             {% if dia in horario.horario_curso.dias_semana.all %}
                                 {% if horario.alocacoes_list %}
                                     {% for alocacao in horario.alocacoes_list %}
-                                        <strong>{{ alocacao.disciplina_professor.disciplina.nome }}</strong><br>
-                                        <em>{{ alocacao.disciplina_professor.professor.nome }}</em><br>
+                                        {% if alocacao.dia_semana == dia %}  <!-- Verifica se a alocação é para o dia correto -->
+                                            <strong>{{ alocacao.disciplina_professor.disciplina.nome }}</strong><br>
+                                            <em>{{ alocacao.disciplina_professor.professor.nome }}</em><br>
+                                        {% endif %}
                                     {% endfor %}
-
                                 {% else %}
                                     <p>Sem disciplinas</p>
                                 {% endif %}

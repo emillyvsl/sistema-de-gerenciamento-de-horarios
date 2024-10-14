@@ -1,4 +1,6 @@
 from django.db import models
+
+from sgh_app.models.dias_semana import DiasSemana
 from .disciplina_professor import DisciplinaProfessor  # Importando o modelo DisciplinaProfessor
 from .ano_semestre import AnoSemestre
 from .horario_curso import HorarioCurso  # Importando o modelo HorarioCurso
@@ -19,9 +21,10 @@ class HorariosDisciplinas(models.Model):
         ('impar', 'Ímpar'),
     ]
     periodo = models.CharField(max_length=5, choices=PERIODO_CHOICES,null=True, blank=True)
+    dia_semana = models.ForeignKey(DiasSemana, on_delete=models.CASCADE, default=1)
 
  
     
     def __str__(self):
-        professor_info = self.disciplina_professor if self.disciplina_professor else "Sem professor"
-        return f"{professor_info} ({self.horario_curso.hora_inicio} - {self.horario_curso.hora_fim}) - {self.horario_curso.curso} - {self.ano_semestre} - {self.periodo}"
+            professor_info = self.disciplina_professor if self.disciplina_professor else "Sem professor"
+            return f"{professor_info} ({self.horario_curso.hora_inicio} - {self.horario_curso.hora_fim}) - {self.horario_curso.curso} - {self.ano_semestre} - {self.periodo} - {self.dia_semana.nome}"
