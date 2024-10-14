@@ -9,7 +9,6 @@ from sgh_app.models.semestre import Semestre
 from sgh_app.models.ano_semestre import AnoSemestre
 
 
-
 @login_required
 def horarioDisciplina(request):
     coordenacao = request.user.coordenacao
@@ -27,11 +26,6 @@ def horarioDisciplina(request):
     dias_semana = DiasSemana.objects.all()
     pesquisa_realizada = False
 
-    # Adicionar as disciplinas e professores ao contexto
-    disciplinas_professores = DisciplinaProfessor.objects.select_related('disciplina', 'professor')
-    print(f"Disciplinas e professores carregados: {disciplinas_professores.count()}")
-
-
     # Obter os horários
     horarios = HorariosDisciplinas.objects.filter(
         horario_curso__curso=curso
@@ -41,13 +35,6 @@ def horarioDisciplina(request):
         'ano_semestre',
         'horario_curso'
     ).prefetch_related('horario_curso__dias_semana')
-    print(f"Horários carregados: {horarios.count()}")
-
-
-
-    for horario in horarios:
-        print(f"ID do HorarioCurso: {horario.horario_curso.id}")
-
 
     if ano and semestre_id:
         horarios = horarios.filter(ano_semestre__ano=ano, ano_semestre__semestre_id=semestre_id)
@@ -61,13 +48,13 @@ def horarioDisciplina(request):
             horarios = None
             messages.warning(request, "Nenhum ano/semestre foi encontrado.")
 
-    # Passando as alocações para o contexto
+    ## Passando as alocações para o contexto
     if horarios:
         for horario in horarios:
-            horario.alocacoes_list = horario.alocacoes.all()
+            # Obter todas as alocações para o HorarioCurso e dia específico
+            alocacoes = HorariosDisciplinas.objects.filter(horario_curso=horario.horario_curso)
+            horario.alocacoes_list = alocacoes  # Passa todas as alocações desse horário
 
-    # Debugging
-    print(f"Horários encontrados: {horarios.count() if horarios else 'Nenhum horário encontrado'}")
 
     colspan_value = len(dias_semana) + 2  # Calcular o valor do colspan
     
@@ -77,7 +64,6 @@ def horarioDisciplina(request):
         'pesquisa_realizada': pesquisa_realizada,
         'dias_semana': dias_semana,
         'colspan_value': colspan_value,
-        'disciplinas_professores': disciplinas_professores
     }
 
     return render(request, 'horarios/horarios_disciplinas.html', context)

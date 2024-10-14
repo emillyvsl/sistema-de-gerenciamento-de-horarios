@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 from sgh_app.models import DiasSemana, HorariosDisciplinas, DisciplinaProfessor, HorarioCurso, AnoSemestre
 
 @login_required
@@ -72,7 +73,8 @@ def alocarDisciplina(request, horario_id, dia_id):
                 ano_semestre=ano_semestre,
                 periodo=periodo  # Usando o período obtido
             )
-            return JsonResponse({'success': True, 'message': 'Disciplina alocada com sucesso!'})
+            # Redirecionar para a página de horários após a alocação bem-sucedida
+            return HttpResponseRedirect(reverse('horarios_disciplinas'))
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'Erro ao alocar disciplina: {str(e)}'}, status=500)
 
