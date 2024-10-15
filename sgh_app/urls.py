@@ -40,6 +40,8 @@ urlpatterns = [
     path('gerar/', gerar_horarios, name='gerar_horarios'),
     path('quadro/<int:ano_semestre_id>/', quadro_horarios, name='quadro_horarios'),
     path('alocar-disciplina/<int:horario_id>/<int:dia_id>/<int:periodo_id>/', alocarDisciplina, name='alocar_disciplina'),
+
+
     path('gerar-pdf/', gerar_pdf, name='gerar_pdf'),
      
      ] 

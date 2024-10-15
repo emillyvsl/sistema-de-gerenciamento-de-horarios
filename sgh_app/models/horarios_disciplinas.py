@@ -10,7 +10,7 @@ class HorariosDisciplinas(models.Model):
     disciplina_professor = models.ForeignKey(DisciplinaProfessor, on_delete=models.CASCADE, related_name='horarios_disciplinas', null=True,)  # Permite valores nulosblank=True  # Permite que o campo fique em branco )
     
     # Relacionamento com HorarioCurso (reutilizando os horários e dias definidos no curso)
-    horario_curso = models.ForeignKey(HorarioCurso, on_delete=models.CASCADE, related_name='horarios_disciplinas', default=1)
+    horario_curso = models.ForeignKey(HorarioCurso, on_delete=models.CASCADE, related_name='horarios_disciplinas')
     
     # Ano e semestre específico para o qual este horário de disciplina está sendo gerado
     ano_semestre = models.ForeignKey(AnoSemestre, on_delete=models.CASCADE, related_name='horarios_disciplinas')
@@ -21,7 +21,7 @@ class HorariosDisciplinas(models.Model):
         ('impar', 'Ímpar'),
     ]
     periodo = models.CharField(max_length=5, choices=PERIODO_CHOICES,null=True, blank=True)
-    dia_semana = models.ForeignKey(DiasSemana, on_delete=models.CASCADE, default=1)
+    dia_semana = models.ForeignKey(DiasSemana, on_delete=models.CASCADE)
 
  
     

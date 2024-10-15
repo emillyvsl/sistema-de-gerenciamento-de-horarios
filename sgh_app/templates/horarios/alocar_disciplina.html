@@ -3,22 +3,22 @@
 <div class="container">
     <h2>Alocar Disciplina</h2>
 
-    <form method="POST">
-        {% csrf_token %}
-        <!-- Campo oculto para ano_semestre_id -->
-        <input type="hidden" name="ano_semestre_id" value="{{ ano_semestre_id }}">
-        
-        <div class="form-group">
-            <label for="disciplina_professor">Disciplina:</label>
-            <select id="disciplina_professor" name="disciplina_professor" class="form-control" required>
-                <option value="" disabled selected>Selecione a Disciplina</option>
-                {% for disciplina_professor in disciplinas_professores %}
-                    <option value="{{ disciplina_professor.id }}">{{ disciplina_professor.disciplina.nome }} - {{ disciplina_professor.professor.nome }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Alocar</button>
-    </form>
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="ano_semestre_id" value="{{ ano_semestre_id }}">
+    
+    <div class="form-group">
+        <label for="disciplina_professor">Disciplina:</label>
+        <select id="disciplina_professor" name="disciplina_professor" class="form-control" required>
+            <option value="" disabled selected>Selecione a Disciplina</option>
+            {% for disciplina_professor in disciplinas_professores %}
+                <option value="{{ disciplina_professor.id }}">{{ disciplina_professor.disciplina.nome }} - {{ disciplina_professor.professor.nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Alocar</button>
+</form>
+
 </div>
 {% endblock %}
 

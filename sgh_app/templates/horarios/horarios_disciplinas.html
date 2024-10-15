@@ -52,52 +52,62 @@
 
     <!-- Tabela de horários -->
     <table class="table">
-        <thead>
-            <tr>
-                <th>Período</th>
-                <th>Horário(s)</th>
-                {% for dia in dias_semana %}
-                    <th>{{ dia.nome }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-        {% if horarios %}
-            {% regroup horarios|dictsort:"periodo" by periodo as periodos_grouped %}
-            {% for periodo in periodos_grouped %}
-                <tr>
-                    <td rowspan="{{ periodo.list|length }}">{{ periodo.grouper }}</td>
-                    
-                    {% for horario in periodo.list %}
-                    <td>{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
-
-                    {% for dia in dias_semana %}
-                        <td>
-                            {% if dia in horario.horario_curso.dias_semana.all %}
-                                {% if horario.alocacoes_list %}
-                                    {% for alocacao in horario.alocacoes_list %}
-                                        {% if alocacao.dia_semana == dia and alocacao.periodo == periodo.grouper %}
-                                            <strong>{{ alocacao.disciplina_professor.disciplina.nome }}</strong><br>
-                                            <em>{{ alocacao.disciplina_professor.professor.nome }}</em><br>
-                                        {% endif %}
-                                    {% endfor %}
-                                {% else %}
-                                    <p>Sem disciplinas</p>
-                                {% endif %}
-                                <a href="{% url 'alocar_disciplina' horario.horario_curso.id dia.id periodo.grouper %}" class="btn btn-secondary btn-sm">Alocar Disciplina</a>
-                            {% endif %}
-                        </td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
+    <thead>
+        <tr>
+            <th>Período</th>
+            <th>Horário(s)</th>
+            {% for dia in dias_semana %}
+                <th>{{ dia.nome }}</th>
             {% endfor %}
-        {% else %}
+        </tr>
+    </thead>
+    <tbody>
+    {% if horarios %}
+        {% regroup horarios|dictsort:"periodo" by periodo as periodos_grouped %}
+        {% for periodo in periodos_grouped %}
             <tr>
-                <td colspan="{{ colspan_value }}">Nenhum horário encontrado.</td>
+                <td rowspan="{{ periodo.list|length }}">{{ periodo.grouper }}</td>
+                
+                {% for horario in periodo.list %}
+                <td>{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
+
+                {% for dia in dias_semana %}
+                    <td>
+                    
+
+                        <!-- Verifica se o dia está relacionado ao horário -->
+                        {% if dia in horario.horario_curso.dias_semana.all %}
+                            
+                            {% if horario.alocacoes_list %}
+                                {% for alocacao in horario.alocacoes_list %}
+                                    {% if alocacao.dia_semana == dia and alocacao.periodo == periodo.grouper %}
+                                        <strong>{{ alocacao.disciplina_professor.disciplina.nome }}</strong><br>
+                                        <em>{{ alocacao.disciplina_professor.professor.nome }}</em><br>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <p>Sem disciplinas</p>
+                            {% endif %}
+                            <a href="{% url 'alocar_disciplina' horario.horario_curso.id dia.id periodo.grouper %}" class="btn btn-secondary btn-sm">
+                                Alocar Disciplina
+                            </a>
+                        {% else %}
+                            <p>{{ dia.nome }} não está relacionado com o horário.</p>
+                        {% endif %}
+                    </td>
+                {% endfor %}
+
             </tr>
-        {% endif %}
-        </tbody>
-    </table>
+            {% endfor %}
+        {% endfor %}
+    {% else %}
+        <tr>
+            <td colspan="{{ colspan_value }}">Nenhum horário encontrado.</td>
+        </tr>
+    {% endif %}
+    </tbody>
+</table>
+
 
     <!-- Botão para gerar novo horário e PDF -->
     <a href="{% url 'gerar_horarios' %}" class="btn btn-primary">Gerar Horários</a>
