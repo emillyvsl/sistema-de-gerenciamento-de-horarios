@@ -18,8 +18,6 @@ def gerenciar_horarios(request):
         'anos_semestres': anos_semestres
     })
 
-
-
 @login_required
 def gerar_horarios(request):
     semestres = Semestre.objects.all()
@@ -34,7 +32,7 @@ def gerar_horarios(request):
         if not coordenacao:
             messages.error(request, "Acesso negado: você não possui coordenação associada.")
             return redirect('home')
-        
+
         curso = coordenacao.curso
 
         # Verificar se o ano e semestre já foram cadastrados para o curso específico
@@ -57,14 +55,26 @@ def gerar_horarios(request):
 
         for horario_curso in horarios_curso:
             for periodo in periodo_opcoes:
-                for dia in dias_semana:  # Associar todos os dias da semana aos horários gerados
-                    HorariosDisciplinas.objects.create(
+                for dia in dias_semana:
+                    # Verificar se o relacionamento correto já existe no banco de dados
+                    if not HorariosDisciplinas.objects.filter(
                         horario_curso=horario_curso,
-                        ano_semestre=ano_semestre,
-                        disciplina_professor=None,
+                        dia_semana=dia,
                         periodo=periodo,
-                        dia_semana=dia  # Certificar que o dia da semana está sendo definido
-                    )
+                        ano_semestre=ano_semestre
+                    ).exists():
+                        # Checar se o horário é válido para aquele dia (ex: verificar se o sábado não está associado incorretamente)
+                        if horario_curso.dias_semana.filter(id=dia.id).exists():
+                            HorariosDisciplinas.objects.create(
+                                horario_curso=horario_curso,
+                                ano_semestre=ano_semestre,
+                                disciplina_professor=None,
+                                periodo=periodo,
+                                dia_semana=dia
+                            )
+                            print(f"Horário criado: {horario_curso}, Dia: {dia.nome}, Período: {periodo}")  # Log de criação
+                        else:
+                            print(f"Horário ignorado: {horario_curso}, Dia: {dia.nome} não é válido.")  # Log de ignorado
 
         messages.success(request, 'Ano e semestre cadastrados com sucesso!')
         return redirect('horarios_disciplinas')
@@ -73,8 +83,6 @@ def gerar_horarios(request):
         'semestres': semestres,
         'periodo_opcoes': periodo_opcoes,
     })
-
-
 
 
 @login_required

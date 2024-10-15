@@ -23,7 +23,8 @@ class HorariosDisciplinas(models.Model):
     periodo = models.CharField(max_length=5, choices=PERIODO_CHOICES,null=True, blank=True)
     dia_semana = models.ForeignKey(DiasSemana, on_delete=models.CASCADE)
 
- 
+    class Meta:
+        unique_together = (('horario_curso', 'dia_semana', 'periodo', 'ano_semestre'),)  # Restrições únicas
     
     def __str__(self):
             professor_info = self.disciplina_professor if self.disciplina_professor else "Sem professor"
