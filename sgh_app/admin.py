@@ -42,42 +42,45 @@ class PreferenciasAdmin(admin.ModelAdmin):
 
 
 class HorariosDisciplinasAdmin(admin.ModelAdmin):
-    list_display = ('get_disciplina', 'get_professor', 'get_dia_semana', 'get_periodo', 'horario_curso', 'ano_semestre')
+    list_display = ('get_disciplina', 'get_professor', 'get_dia_semana', 'get_periodo', 'get_curso', 'horario_curso', 'ano_semestre')
     search_fields = ('disciplina_professor__disciplina__nome', 'disciplina_professor__professor__nome')
-    list_filter = ('horario_curso__curso', 'ano_semestre', 'dia_semana', 'periodo')
+    list_filter = ('horario_curso__curso', 'ano_semestre', 'dia_semana', 'periodo', 'curso')
 
     def get_disciplina(self, obj):
-        # Verifica se disciplina_professor existe antes de acessar disciplina
         if obj.disciplina_professor and obj.disciplina_professor.disciplina:
             return obj.disciplina_professor.disciplina.nome
-        return "Sem disciplina"  # Retorna um valor padrão se não houver disciplina
+        return "Sem disciplina"
 
     get_disciplina.short_description = 'Disciplina'
 
     def get_professor(self, obj):
-        # Verifica se disciplina_professor existe antes de acessar professor
         if obj.disciplina_professor and obj.disciplina_professor.professor:
             return obj.disciplina_professor.professor.nome
-        return "Sem professor"  # Retorna um valor padrão se não houver professor
+        return "Sem professor"
 
     get_professor.short_description = 'Professor'
 
     def get_dia_semana(self, obj):
-        # Retorna o nome do dia da semana relacionado ao horário
         if obj.dia_semana:
             return obj.dia_semana.nome
-        return "Sem dia definido"  # Retorna um valor padrão se não houver dia da semana relacionado
+        return "Sem dia definido"
 
     get_dia_semana.short_description = 'Dia da Semana'
 
     def get_periodo(self, obj):
-        # Retorna o período relacionado ao horário
         if obj.periodo:
-            return obj.get_periodo_display()  # Se 'periodo' for uma escolha (choices), use 'get_periodo_display'
+            return obj.get_periodo_display()
         return "Sem período"
 
     get_periodo.short_description = 'Período'
 
+    def get_curso(self, obj):
+        # Adiciona a exibição do curso
+        if obj.curso:
+            return obj.curso.nome
+        return "Sem curso"
+
+    get_curso.short_description = 'Curso'
 
 class AnoSemestreAdmin(admin.ModelAdmin):
     list_display = ('ano', 'semestre')  # Campos que serão exibidos na listagem

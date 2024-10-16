@@ -58,16 +58,32 @@ def horarioDisciplina(request):
             messages.warning(request, "Nenhum ano/semestre foi encontrado.")
 
     # Adicionar alocações ao contexto
+    horarios_unicos = []
+    horarios_vistos = set()  # Usaremos um set para guardar os horários já vistos
+
     if horarios:
         for horario in horarios:
-            # Obter todas as alocações para o HorarioCurso e dia específico
-            alocacoes = HorariosDisciplinas.objects.filter(horario_curso=horario.horario_curso)
-            horario.alocacoes_list = alocacoes  # Passa todas as alocações desse horário
+            # Criar uma "chave" que represente as informações essenciais para evitar duplicação
+            chave_horario = (
+                horario.horario_curso.hora_inicio,
+                horario.horario_curso.hora_fim,
+                horario.periodo,
+                tuple(dia.nome for dia in horario.horario_curso.dias_semana.all())  # Converter dias para tupla
+            )
+
+            # Se essa chave não foi vista antes, adicionar o horário aos horários únicos
+            if chave_horario not in horarios_vistos:
+                horarios_vistos.add(chave_horario)
+                horarios_unicos.append(horario)
+
+                # Obter todas as alocações para o HorarioCurso e dia específico
+                alocacoes = HorariosDisciplinas.objects.filter(horario_curso=horario.horario_curso)
+                horario.alocacoes_list = alocacoes  # Passa todas as alocações desse horário
 
     colspan_value = len(dias_semana) + 2  # Calcular o valor do colspan
     
     context = {
-        'horarios': horarios,
+        'horarios': horarios_unicos,  # Passar somente os horários únicos
         'semestres': semestres,
         'pesquisa_realizada': pesquisa_realizada,
         'dias_semana': dias_semana,
