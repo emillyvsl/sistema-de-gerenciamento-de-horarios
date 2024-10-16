@@ -111,7 +111,10 @@
 
     <!-- Botão para gerar novo horário e PDF -->
     <a href="{% url 'gerar_horarios' %}" class="btn btn-primary">Gerar Horários</a>
-    <a href="{% url 'gerar_pdf' %}" class="btn btn-primary">Baixar Horários em PDF</a>
+    <a href="{% url 'gerar_pdf' %}?ano={{ request.GET.ano }}&semestre={{ request.GET.semestre }}" class="btn btn-primary">Baixar Horários em PDF</a>
+
+
+
 
 </div>
 {% endblock %}

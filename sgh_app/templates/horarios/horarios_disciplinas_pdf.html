@@ -29,7 +29,6 @@
         <p>Nenhum horário encontrado para o último semestre.</p>
     {% endif %}
 
-    <!-- Tabela de horários -->
     <table>
         <thead>
             <tr>
@@ -55,7 +54,7 @@
                             {% if dia in horario.horario_curso.dias_semana.all %}
                                 {% if horario.alocacoes_list %}
                                     {% for alocacao in horario.alocacoes_list %}
-                                        {% if alocacao.dia_semana == dia and alocacao.periodo == periodo.grouper %}
+                                        {% if alocacao.dia_semana == dia and alocacao.periodo == horario.periodo %}
                                             <strong>{{ alocacao.disciplina_professor.disciplina.nome }}</strong><br>
                                             <em>{{ alocacao.disciplina_professor.professor.nome }}</em><br>
                                         {% endif %}
