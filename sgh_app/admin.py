@@ -83,7 +83,7 @@ class HorariosDisciplinasAdmin(admin.ModelAdmin):
     get_curso.short_description = 'Curso'
 
 class AnoSemestreAdmin(admin.ModelAdmin):
-    list_display = ('ano', 'semestre')  # Campos que serão exibidos na listagem
+    list_display = ('ano', 'semestre','curso')  # Campos que serão exibidos na listagem
     search_fields = ('ano',)  # Campos que podem ser pesquisados
     list_filter = ('semestre',)  # Campos pelos quais é possível filtrar 
 

@@ -61,7 +61,8 @@ def gerar_horarios(request):
                         horario_curso=horario_curso,
                         dia_semana=dia,
                         periodo=periodo,
-                        ano_semestre=ano_semestre
+                        ano_semestre=ano_semestre,
+                        curso=curso
                     ).exists():
                         # Checar se o horário é válido para aquele dia (ex: verificar se o sábado não está associado incorretamente)
                         if horario_curso.dias_semana.filter(id=dia.id).exists():
@@ -70,7 +71,8 @@ def gerar_horarios(request):
                                 ano_semestre=ano_semestre,
                                 disciplina_professor=None,
                                 periodo=periodo,
-                                dia_semana=dia
+                                dia_semana=dia,
+                                curso=curso
                             )
                             print(f"Horário criado: {horario_curso}, Dia: {dia.nome}, Período: {periodo}")  # Log de criação
                         else:

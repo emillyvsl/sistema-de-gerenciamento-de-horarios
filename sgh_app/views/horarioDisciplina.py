@@ -18,6 +18,7 @@ from sgh_app.models.horario_curso import HorarioCurso
 from sgh_app.models.semestre import Semestre
 from sgh_app.models.ano_semestre import AnoSemestre
 
+
 @login_required
 def horarioDisciplina(request):
     coordenacao = request.user.coordenacao
@@ -35,9 +36,9 @@ def horarioDisciplina(request):
     dias_semana = DiasSemana.objects.all()
     pesquisa_realizada = False
 
-    # Obter os horários com a relação para os dias da semana
+    # Obter os horários com a relação para os dias da semana, filtrando pelo curso atual
     horarios = HorariosDisciplinas.objects.filter(
-        horario_curso__curso=curso
+        horario_curso__curso=curso  # Filtro pelo curso atual
     ).select_related(
         'disciplina_professor__disciplina',
         'disciplina_professor__professor',
@@ -46,11 +47,13 @@ def horarioDisciplina(request):
     ).prefetch_related('horario_curso__dias_semana')
 
     if ano and semestre_id:
+        # Filtrar também por ano e semestre fornecidos pelo usuário
         horarios = horarios.filter(ano_semestre__ano=ano, ano_semestre__semestre_id=semestre_id)
         pesquisa_realizada = True
     else:
         try:
-            ultimo_ano_semestre = AnoSemestre.objects.latest('ano', 'semestre')
+            # Se o ano e semestre não forem fornecidos, buscar o mais recente
+            ultimo_ano_semestre = AnoSemestre.objects.filter(curso=curso).latest('ano', 'semestre')  # Filtro adicional pelo curso
             horarios = horarios.filter(ano_semestre=ultimo_ano_semestre)
             messages.warning(request, "Para pesquisar deve ser selecionado o ano e o semestre. Exibindo o quadro mais recente.")
         except AnoSemestre.DoesNotExist:
@@ -59,7 +62,7 @@ def horarioDisciplina(request):
 
     # Adicionar alocações ao contexto
     horarios_unicos = []
-    horarios_vistos = set()  # Usaremos um set para guardar os horários já vistos
+    horarios_vistos = set()
 
     if horarios:
         for horario in horarios:
@@ -68,7 +71,7 @@ def horarioDisciplina(request):
                 horario.horario_curso.hora_inicio,
                 horario.horario_curso.hora_fim,
                 horario.periodo,
-                tuple(dia.nome for dia in horario.horario_curso.dias_semana.all())  # Converter dias para tupla
+                tuple(dia.nome for dia in horario.horario_curso.dias_semana.all())
             )
 
             # Se essa chave não foi vista antes, adicionar o horário aos horários únicos
@@ -81,9 +84,9 @@ def horarioDisciplina(request):
                 horario.alocacoes_list = alocacoes  # Passa todas as alocações desse horário
 
     colspan_value = len(dias_semana) + 2  # Calcular o valor do colspan
-    
+
     context = {
-        'horarios': horarios_unicos,  # Passar somente os horários únicos
+        'horarios': horarios_unicos,
         'semestres': semestres,
         'pesquisa_realizada': pesquisa_realizada,
         'dias_semana': dias_semana,
