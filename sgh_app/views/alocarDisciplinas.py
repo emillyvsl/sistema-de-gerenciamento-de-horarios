@@ -7,7 +7,21 @@ from sgh_app.models import DiasSemana, HorariosDisciplinas, DisciplinaProfessor,
 
 @login_required
 def alocarDisciplina(request, horario_id, dia_id, periodo_id):
-    print(f"Dia ID: {dia_id}, Horario ID: {horario_id}, Periodo ID: {periodo_id}")
+    # Obtém o usuário logado
+    user = request.user
+
+    # Obtém a coordenação associada ao usuário logado
+    coordenacao = user.coordenacao
+
+    if not coordenacao:
+        # Se o usuário não estiver associado a nenhuma coordenação
+        messages.error(request, "Você não possui coordenação associada.")
+        return redirect('horarios_disciplinas')
+
+    # Obter o curso associado à coordenação do usuário
+    curso = coordenacao.curso
+
+    print(f"Dia ID: {dia_id}, Horario ID: {horario_id}, Período ID: {periodo_id}")
     print(f"Dados POST: {request.POST}")
 
     # Obter HorarioCurso, DiaSemana e verificar o período específico
@@ -21,7 +35,9 @@ def alocarDisciplina(request, horario_id, dia_id, periodo_id):
     print(f"Período: {periodo}")
 
     if request.method == 'GET':
-        disciplinas_professores = DisciplinaProfessor.objects.all()
+        # Filtrar as disciplinas e professores relacionados ao curso da coordenação do usuário logado
+        disciplinas_professores = DisciplinaProfessor.objects.filter(disciplina__curso=curso)
+
         try:
             # Buscar a alocação existente para o horário, dia, e período
             hor_disc = HorariosDisciplinas.objects.filter(
