@@ -1,120 +1,123 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
-    <form method="GET" action="">
-        <div class="row">
-            <div class="col-md-6">
-                <label for="ano">Ano:</label>
-                <input type="number" id="ano" name="ano" class="form-control" 
-                       placeholder="Informe o Ano" value="{{ request.GET.ano }}">
+<div class="container mt-5 mb-5"> <!-- Adicionando margens superiores e inferiores -->
+    <div class="content-wrapper p-4"> <!-- Adicionando padding e centralizando o conteúdo -->
+        <form method="GET" action="">
+            <div class="row align-items-center"> <!-- Alinhando verticalmente os elementos no meio -->
+                <div class="col-md-6">
+                    <label for="ano">Ano:</label>
+                    <input type="number" id="ano" name="ano" class="form-control" 
+                           placeholder="Informe o Ano" value="{{ request.GET.ano }}">
+                </div>
+                <div class="col-md-6">
+                    <label for="semestre">Semestre:</label>
+                    <select id="semestre" name="semestre" class="form-control">
+                        <option value="" disabled selected>Informe o Semestre</option>
+                        {% for semestre in semestres %}
+                            <option value="{{ semestre.id }}" {% if semestre.id == request.GET.semestre %}selected{% endif %}>
+                                {{ semestre.get_nome_display }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-            <div class="col-md-6">
-                <label for="semestre">Semestre:</label>
-                <select id="semestre" name="semestre" class="form-control">
-                    <option value="" disabled selected>Informe o Semestre</option>
-                    {% for semestre in semestres %}
-                        <option value="{{ semestre.id }}" {% if semestre.id == request.GET.semestre %}selected{% endif %}>
-                            {{ semestre.get_nome_display }}
-                        </option>
+            <br>
+            <!-- Posicionando os botões no canto direito -->
+            <div class="d-flex justify-content-between align-items-center"> <!-- Centralizando verticalmente e horizontalmente -->
+                <!-- Botão de Pesquisar -->
+                <button type="submit" class="btn btn-primary">Pesquisar</button>
+
+                <!-- Botões de Gerar e Baixar PDF -->
+                <div>
+                    <a href="{% url 'gerar_horarios' %}" class="btn btn-primary mr-2">Gerar Horários</a>
+                    <a href="{% url 'gerar_pdf' %}?ano={{ request.GET.ano }}&semestre={{ request.GET.semestre }}" class="btn btn-primary">Baixar Horários em PDF</a>
+                </div>
+            </div>
+        </form>
+
+        {% if horarios %}
+            {% with horario=horarios.0 %}
+                <h2 class="text-center mt-4">Quadro de Horários do {{ horario.ano_semestre.semestre }} do Ano {{ horario.ano_semestre.ano }}</h2>
+            {% endwith %}
+        {% else %}
+            <h2 class="text-center mt-4">Quadro de Horários</h2>
+            <p class="text-center">Nenhum horário encontrado para o último semestre.</p>
+        {% endif %}
+
+        <!-- Tabela de horários -->
+        <table class="table table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Período</th>
+                    <th>Horário(s)</th>
+                    {% for dia in dias_semana %}
+                        <th>{{ dia.nome }}</th>
                     {% endfor %}
-                </select>
-            </div>
-        </div>
-        <br>
-        <button type="submit" class="btn btn-primary">Pesquisar</button>
-    </form>
+                </tr>
+            </thead>
+            <tbody>
+            {% if horarios %}
+                {% regroup horarios|dictsort:"periodo" by periodo as periodos_grouped %}
+                {% for periodo in periodos_grouped %}
+                    <tr>
+                        <td rowspan="{{ periodo.list|length }}">{{ periodo.grouper }}</td>
+                        
+                        {% for horario in periodo.list %}
+                        <td>{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
 
-    {% if horarios %}
-        {% with horario=horarios.0 %}
-            <h2>Quadro de Horários do {{ horario.ano_semestre.semestre }} do Ano {{ horario.ano_semestre.ano }}</h2>
-        {% endwith %}
-    {% else %}
-        <h2>Quadro de Horários</h2>
-        <p>Nenhum horário encontrado para o último semestre.</p>
-    {% endif %}
-
-    <!-- Estilos para a tabela -->
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: left;
-        }
-        h2 {
-            text-align: center;
-        }
-    </style>
-
-    <!-- Tabela de horários -->
-    <table class="table">
-    <thead>
-        <tr>
-            <th>Período</th>
-            <th>Horário(s)</th>
-            {% for dia in dias_semana %}
-                <th>{{ dia.nome }}</th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
-    {% if horarios %}
-        {% regroup horarios|dictsort:"periodo" by periodo as periodos_grouped %}
-        {% for periodo in periodos_grouped %}
-            <tr>
-                <td rowspan="{{ periodo.list|length }}">{{ periodo.grouper }}</td>
-                
-                {% for horario in periodo.list %}
-                <td>{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
-
-                {% for dia in dias_semana %}
-                    <td>
-                    
-
-                        <!-- Verifica se o dia está relacionado ao horário -->
-                        {% if dia in horario.horario_curso.dias_semana.all %}
-                            
-                            {% if horario.alocacoes_list %}
-                                {% for alocacao in horario.alocacoes_list %}
-                                    {% if alocacao.dia_semana == dia and alocacao.periodo == periodo.grouper %}
-                                        <strong>{{ alocacao.disciplina_professor.disciplina.nome }}</strong><br>
-                                        <em>{{ alocacao.disciplina_professor.professor.nome }}</em><br>
+                        {% for dia in dias_semana %}
+                            <td>
+                                <!-- Verifica se o dia está relacionado ao horário -->
+                                {% if dia in horario.horario_curso.dias_semana.all %}
+                                    {% if horario.alocacoes_list %}
+                                        {% for alocacao in horario.alocacoes_list %}
+                                            {% if alocacao.dia_semana == dia and alocacao.periodo == periodo.grouper %}
+                                                <strong>{{ alocacao.disciplina_professor.disciplina.nome }}</strong><br>
+                                                <em>{{ alocacao.disciplina_professor.professor.nome }}</em><br>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <p>Sem disciplinas</p>
                                     {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                <p>Sem disciplinas</p>
-                            {% endif %}
-                            <a href="{% url 'alocar_disciplina' horario.horario_curso.id dia.id periodo.grouper %}" class="btn btn-secondary btn-sm">
-                                Alocar Disciplina
-                            </a>
-                        {% else %}
-                            <p>{{ dia.nome }} não está relacionado com o horário.</p>
-                        {% endif %}
-                    </td>
+                                    <a href="{% url 'alocar_disciplina' horario.horario_curso.id dia.id periodo.grouper %}" class="btn btn-secondary btn-sm">
+                                        Alocar Disciplina
+                                    </a>
+                                {% else %}
+                                    <p>Sem Aula</p>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
                 {% endfor %}
-
-            </tr>
-            {% endfor %}
-        {% endfor %}
-    {% else %}
-        <tr>
-            <td colspan="{{ colspan_value }}">Nenhum horário encontrado.</td>
-        </tr>
-    {% endif %}
-    </tbody>
-</table>
-
-
-    <!-- Botão para gerar novo horário e PDF -->
-    <a href="{% url 'gerar_horarios' %}" class="btn btn-primary">Gerar Horários</a>
-    <a href="{% url 'gerar_pdf' %}?ano={{ request.GET.ano }}&semestre={{ request.GET.semestre }}" class="btn btn-primary">Baixar Horários em PDF</a>
-
-
-
-
+            {% else %}
+                <tr>
+                    <td colspan="{{ colspan_value }}">Nenhum horário encontrado.</td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}
+
+<!-- Custom CSS para centralização e margens -->
+<style>
+    .content-wrapper {
+        max-width: 1000px; /* Largura máxima do conteúdo */
+        margin: 0 auto; /* Centraliza o conteúdo horizontalmente */
+        background-color: #fff; /* Fundo branco */
+        padding: 20px; /* Adiciona padding para espaçamento interno */
+        border-radius: 8px; /* Bordas arredondadas */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para destaque */
+    }
+
+    .table {
+        margin-top: 20px; /* Espaçamento superior para a tabela */
+    }
+
+    h2 {
+        margin-top: 20px; /* Espaçamento superior para o título */
+    }
+</style>

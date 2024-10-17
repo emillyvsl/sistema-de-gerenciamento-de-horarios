@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.template.loader import get_template
 from django.http import HttpResponse
 from weasyprint import HTML
@@ -11,7 +11,7 @@ def gerar_pdf(request):
     coordenacao = request.user.coordenacao
 
     if not coordenacao:
-        return redirect('home')
+        return redirect('index')
 
     curso = coordenacao.curso
     semestres = Semestre.objects.all()
