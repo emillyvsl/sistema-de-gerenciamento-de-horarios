@@ -55,6 +55,11 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
+                <div class="alert alert-danger">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
             {% endfor %}
         </div>
     {% endif %}

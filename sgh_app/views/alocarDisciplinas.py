@@ -1,8 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect, JsonResponse
-from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.urls import reverse
-from sgh_app.models import DiasSemana, HorariosDisciplinas, DisciplinaProfessor, HorarioCurso, AnoSemestre
+from django.contrib.auth.decorators import login_required
+from sgh_app.models import DiasSemana, HorariosDisciplinas, DisciplinaProfessor, HorarioCurso, AnoSemestre, AlocacaoDisciplinas
 
 @login_required
 def alocarDisciplina(request, horario_id, dia_id, periodo_id):
@@ -40,11 +41,11 @@ def alocarDisciplina(request, horario_id, dia_id, periodo_id):
                 print("Nenhum AnoSemestre encontrado.")
 
         context = {
-            'horario': horario,  # Corrigindo o objeto passado
+            'horario': horario,
             'dia': dia_semana,
             'disciplinas_professores': disciplinas_professores,
             'ano_semestre_id': ano_semestre_id,
-            'periodo': periodo,  # O período numérico é passado para o template
+            'periodo': periodo,
         }
 
         return render(request, 'horarios/alocar_disciplina.html', context)
@@ -64,6 +65,20 @@ def alocarDisciplina(request, horario_id, dia_id, periodo_id):
         ano_semestre = get_object_or_404(AnoSemestre, id=ano_semestre_id)
 
         try:
+            # Verificar se o professor já está alocado no mesmo horário, dia e ano/semestre
+            conflito_alocacao = HorariosDisciplinas.objects.filter(
+                disciplina_professor__professor=disciplina_professor.professor,
+                horario_curso__hora_inicio=horario.hora_inicio,
+                horario_curso__hora_fim=horario.hora_fim,
+                dia_semana=dia_semana,
+                ano_semestre=ano_semestre
+            ).exists()
+
+            if conflito_alocacao:
+                # Se já existir uma alocação para o professor no mesmo horário, dia e ano/semestre, impedir a criação
+                messages.error(request, f"O professor {disciplina_professor.professor.nome} já está alocado no mesmo dia e horário.")
+                return HttpResponseRedirect(reverse('horarios_disciplinas'))
+
             # Verificar se já existe uma alocação sem professor
             alocacao_existente = HorariosDisciplinas.objects.filter(
                 horario_curso=horario,
@@ -87,11 +102,11 @@ def alocarDisciplina(request, horario_id, dia_id, periodo_id):
                     dia_semana=dia_semana
                 )
                 print(f"Nova alocação criada: {nova_alocacao}")
-                print("Dados salvos com sucesso!")
             else:
                 print("Alocação já existente.")
 
             return HttpResponseRedirect(reverse('horarios_disciplinas'))
+
         except Exception as e:
             print(f"Erro ao salvar alocação para {dia_semana.nome} no período {periodo}. Detalhes do erro: {str(e)}")
             return JsonResponse({'success': False, 'message': f'Erro ao alocar disciplina: {str(e)}'}, status=500)
