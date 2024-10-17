@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib import messages
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from sgh_app.models import DiasSemana, HorariosDisciplinas, DisciplinaProfessor, HorarioCurso, AnoSemestre, AlocacaoDisciplinas
+from sgh_app.models import DiasSemana, HorariosDisciplinas, DisciplinaProfessor, HorarioCurso, AnoSemestre
 
 @login_required
 def alocarDisciplina(request, horario_id, dia_id, periodo_id):
@@ -79,20 +79,34 @@ def alocarDisciplina(request, horario_id, dia_id, periodo_id):
                 messages.error(request, f"O professor {disciplina_professor.professor.nome} já está alocado no mesmo dia e horário.")
                 return HttpResponseRedirect(reverse('horarios_disciplinas'))
 
-            # Verificar se já existe uma alocação sem professor
+            # Verificar se já existe uma alocação no mesmo dia, horário e período (independentemente do professor)
             alocacao_existente = HorariosDisciplinas.objects.filter(
+                horario_curso=horario,
+                dia_semana=dia_semana,
+                periodo=periodo,
+                ano_semestre=ano_semestre
+            ).exclude(disciplina_professor=None).exists()
+
+            if alocacao_existente:
+                # Impedir a criação se já existir uma alocação para aquele dia, horário e período
+                messages.error(request, f"Já existe uma alocação para o dia {dia_semana.nome}, horário {horario.hora_inicio}-{horario.hora_fim} e período {periodo}.")
+                return HttpResponseRedirect(reverse('horarios_disciplinas'))
+
+            # Verificar se já existe uma alocação sem professor
+            alocacao_sem_professor = HorariosDisciplinas.objects.filter(
                 horario_curso=horario,
                 dia_semana=dia_semana,
                 periodo=periodo,
                 ano_semestre=ano_semestre
             ).first()
 
-            if alocacao_existente and alocacao_existente.disciplina_professor is None:
+            if alocacao_sem_professor and alocacao_sem_professor.disciplina_professor is None:
                 # Atualiza a alocação existente com o professor selecionado
-                alocacao_existente.disciplina_professor = disciplina_professor
-                alocacao_existente.save()
-                print(f"Alocação atualizada: {alocacao_existente}")
-            elif not alocacao_existente:
+                alocacao_sem_professor.disciplina_professor = disciplina_professor
+                alocacao_sem_professor.save()
+                print(f"Alocação atualizada: {alocacao_sem_professor}")
+                messages.success(request, 'Alocação atualizada com sucesso.')
+            elif not alocacao_sem_professor:
                 # Cria uma nova alocação se não houver uma alocação existente
                 nova_alocacao = HorariosDisciplinas.objects.create(
                     disciplina_professor=disciplina_professor,
@@ -102,8 +116,10 @@ def alocarDisciplina(request, horario_id, dia_id, periodo_id):
                     dia_semana=dia_semana
                 )
                 print(f"Nova alocação criada: {nova_alocacao}")
+                messages.success(request, 'Nova alocação criada com sucesso.')
             else:
                 print("Alocação já existente.")
+                messages.warning(request, 'Alocação já existente.')
 
             return HttpResponseRedirect(reverse('horarios_disciplinas'))
 
