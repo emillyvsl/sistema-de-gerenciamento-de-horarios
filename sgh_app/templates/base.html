@@ -42,32 +42,39 @@
 </head>
 <body>
 
-    {% include 'components/navbar.html' %}    
+    {% include 'components/navbar.html' %}
 
-    <div class="content">
+    <div class="content"> <!-- Adicione esta linha -->
         <!-- Bloco de mensagens -->
-    {% if messages %}
-        <div class="container mt-3">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="alert alert-danger">
-                    {% for message in messages %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for message in messages %}
+                    <div class="alert 
+                        {% if message.tags == 'error' %}
+                            alert-danger
+                        {% elif message.tags == 'warning' %}
+                            alert-warning
+                        {% elif message.tags == 'success' %}
+                            alert-success
+                        {% elif message.tags == 'info' %}
+                            alert-info
+                        {% else %}
+                            alert-secondary
+                        {% endif %}
+                        alert-dismissible fade show" role="alert">
                         {{ message }}
-                    {% endfor %}
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-    
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         {% block content %}
         <!-- O conteúdo das outras páginas será inserido aqui -->
         {% endblock %}
-    </div>
+    </div> <!-- Feche a div aqui -->
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
