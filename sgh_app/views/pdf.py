@@ -64,8 +64,11 @@ def gerar_pdf(request):
                 horarios_vistos.add(chave_horario)
                 horarios_unicos.append(horario)
 
-                # Obter todas as alocações para o HorarioCurso e dia específico
-                alocacoes = HorariosDisciplinas.objects.filter(horario_curso=horario.horario_curso)
+                # Obter todas as alocações para o HorarioCurso, **filtrando pelo ano_semestre correto**
+                alocacoes = HorariosDisciplinas.objects.filter(
+                    horario_curso=horario.horario_curso,
+                    ano_semestre=horario.ano_semestre  # Filtrar pela relação correta de ano_semestre
+                )
                 horario.alocacoes_list = alocacoes  # Passa todas as alocações desse horário
 
     colspan_value = len(dias_semana) + 2
