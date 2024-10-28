@@ -18,16 +18,14 @@ class PeriodoAdmin(admin.ModelAdmin):
     search_fields = ('semestre__nome',)  
     list_filter = ('semestre',)  
 
-
 class DiasSemanaAdmin(admin.ModelAdmin):
     list_display = ('nome',)
     search_fields = ('nome',)
 
-class HorarioCursoAdmin(admin.ModelAdmin): #deve ser retirado depois
+class HorarioCursoAdmin(admin.ModelAdmin):
     list_display = ('curso', 'hora_inicio', 'hora_fim')
     search_fields = ('curso__nome',)
     list_filter = ('curso',)
-
 
 class PreferenciasAdmin(admin.ModelAdmin):
     list_display = ('professor', 'get_dias_preferidos', 'get_horas_preferidas')
@@ -40,58 +38,36 @@ class PreferenciasAdmin(admin.ModelAdmin):
         return ', '.join([hora.__str__() for hora in obj.horas_preferidas.all()])
     get_horas_preferidas.short_description = 'Horas Preferidas'
 
-
 class HorariosDisciplinasAdmin(admin.ModelAdmin):
-    list_display = ('get_disciplina', 'get_professor', 'get_dia_semana', 'get_periodo', 'get_curso', 'horario_curso', 'ano_semestre')
-    search_fields = ('disciplina_professor__disciplina__nome', 'disciplina_professor__professor__nome')
+    list_display = ('get_disciplina', 'get_dia_semana', 'get_periodo', 'get_curso', 'horario_curso', 'ano_semestre')
+    search_fields = ('disciplina__nome',)
     list_filter = ('horario_curso__curso', 'ano_semestre', 'dia_semana', 'periodo', 'curso')
 
     def get_disciplina(self, obj):
-        if obj.disciplina_professor and obj.disciplina_professor.disciplina:
-            return obj.disciplina_professor.disciplina.nome
-        return "Sem disciplina"
-
+        return obj.disciplina.nome if obj.disciplina else "Sem disciplina"
     get_disciplina.short_description = 'Disciplina'
 
-    def get_professor(self, obj):
-        if obj.disciplina_professor and obj.disciplina_professor.professor:
-            return obj.disciplina_professor.professor.nome
-        return "Sem professor"
-
-    get_professor.short_description = 'Professor'
-
     def get_dia_semana(self, obj):
-        if obj.dia_semana:
-            return obj.dia_semana.nome
-        return "Sem dia definido"
-
+        return obj.dia_semana.nome if obj.dia_semana else "Sem dia definido"
     get_dia_semana.short_description = 'Dia da Semana'
 
     def get_periodo(self, obj):
-        if obj.periodo:
-            return obj.get_periodo_display()
-        return "Sem período"
-
+        return obj.get_periodo_display() if obj.periodo else "Sem período"
     get_periodo.short_description = 'Período'
 
     def get_curso(self, obj):
-        # Adiciona a exibição do curso
-        if obj.curso:
-            return obj.curso.nome
-        return "Sem curso"
-
+        return obj.curso.nome if obj.curso else "Sem curso"
     get_curso.short_description = 'Curso'
 
 class AnoSemestreAdmin(admin.ModelAdmin):
-    list_display = ('ano', 'semestre','curso')  # Campos que serão exibidos na listagem
-    search_fields = ('ano',)  # Campos que podem ser pesquisados
-    list_filter = ('semestre',)  # Campos pelos quais é possível filtrar 
-
+    list_display = ('ano', 'semestre', 'curso')
+    search_fields = ('ano',)
+    list_filter = ('semestre',)
 
 class AlocacaoDisciplinasAdmin(admin.ModelAdmin):
-    list_display = ('horarios_disciplinas', 'disciplina_professor',)  
-    search_fields = ('disciplina_professor__disciplina__nome', 'disciplina_professor__professor__nome',)  
-    list_filter = ('horarios_disciplinas__horario_curso__curso',)  
+    list_display = ('horarios_disciplinas',)
+    search_fields = ('horarios_disciplinas__disciplina__nome',)
+    list_filter = ('horarios_disciplinas__horario_curso__curso',)
 
 admin.site.register(Centro)
 admin.site.register(Curso, CursoAdmin)
@@ -104,4 +80,3 @@ admin.site.register(Preferencias, PreferenciasAdmin)
 admin.site.register(HorariosDisciplinas, HorariosDisciplinasAdmin)
 admin.site.register(AnoSemestre, AnoSemestreAdmin)
 admin.site.register(AlocacaoDisciplinas, AlocacaoDisciplinasAdmin)
-

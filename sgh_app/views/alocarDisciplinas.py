@@ -3,63 +3,44 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib import messages
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from sgh_app.models import DiasSemana, HorariosDisciplinas, DisciplinaProfessor, HorarioCurso, AnoSemestre
+from sgh_app.models import DiasSemana, HorariosDisciplinas, Disciplina, HorarioCurso, AnoSemestre, DisciplinaProfessor
 
 @login_required
 def alocarDisciplina(request, horario_id, dia_id, periodo_id):
-    # Obtém o usuário logado
     user = request.user
-
-    # Obtém a coordenação associada ao usuário logado
     coordenacao = user.coordenacao
 
     if not coordenacao:
-        # Se o usuário não estiver associado a nenhuma coordenação
         messages.error(request, "Você não possui coordenação associada.")
         return redirect('horarios_disciplinas')
 
-    # Obter o curso associado à coordenação do usuário
     curso = coordenacao.curso
-
-    print(f"Dia ID: {dia_id}, Horario ID: {horario_id}, Período ID: {periodo_id}")
-    print(f"Dados POST: {request.POST}")
-
-    # Obter HorarioCurso, DiaSemana e verificar o período específico
     horario = get_object_or_404(HorarioCurso, id=horario_id)
     dia_semana = get_object_or_404(DiasSemana, id=dia_id)
-    periodo = periodo_id  # Recebe o período numérico diretamente
-
-    # Depuração para verificar se os objetos foram carregados corretamente
-    print(f"Horario: {horario}")
-    print(f"Dia da semana: {dia_semana}")
-    print(f"Período: {periodo}")
+    periodo = periodo_id
 
     if request.method == 'GET':
-        # Filtrar as disciplinas e professores relacionados ao curso da coordenação do usuário logado
-        disciplinas_professores = DisciplinaProfessor.objects.filter(disciplina__curso=curso)
+        # Filtrar disciplinas relacionadas ao curso e com professores associados
+        disciplinas_com_professores = Disciplina.objects.filter(
+            curso=curso, disciplina_professores__isnull=False
+        ).distinct()
 
         try:
-            # Buscar a alocação existente para o horário, dia, e período
             hor_disc = HorariosDisciplinas.objects.filter(
                 horario_curso=horario, dia_semana=dia_semana, periodo=periodo
             ).latest('ano_semestre')
             ano_semestre_id = hor_disc.ano_semestre.id
-            print(f"Alocação encontrada. Ano Semestre ID: {ano_semestre_id}")
         except HorariosDisciplinas.DoesNotExist:
-            # Tentar buscar o ano/semestre mais recente se não houver alocação
             try:
                 ano_semestre = AnoSemestre.objects.latest('id')
                 ano_semestre_id = ano_semestre.id
-                print(f"Nenhuma alocação existente. Usando Ano Semestre ID mais recente: {ano_semestre_id}")
             except AnoSemestre.DoesNotExist:
-                # Se não houver AnoSemestre registrado
                 ano_semestre_id = None
-                print("Nenhum AnoSemestre encontrado.")
 
         context = {
             'horario': horario,
             'dia': dia_semana,
-            'disciplinas_professores': disciplinas_professores,
+            'disciplinas': disciplinas_com_professores,
             'ano_semestre_id': ano_semestre_id,
             'periodo': periodo,
         }
@@ -67,80 +48,60 @@ def alocarDisciplina(request, horario_id, dia_id, periodo_id):
         return render(request, 'horarios/alocar_disciplina.html', context)
 
     elif request.method == 'POST':
-        disciplina_professor_id = request.POST.get('disciplina_professor')
+        disciplina_id = request.POST.get('disciplina')
         ano_semestre_id = request.POST.get('ano_semestre_id')
 
-        # Logs para depuração
-        print(f"Tentando alocar disciplina para {dia_semana.nome} no período {periodo}")
-        print(f"Disciplina Professor ID: {disciplina_professor_id}")
-        print(f"Ano Semestre ID: {ano_semestre_id}")
-        print(f"Periodo: {periodo}")
-
-        # Garantir que estamos alocando para o ano/semestre e disciplina corretos
-        disciplina_professor = get_object_or_404(DisciplinaProfessor, id=disciplina_professor_id)
+        disciplina = get_object_or_404(Disciplina, id=disciplina_id)
         ano_semestre = get_object_or_404(AnoSemestre, id=ano_semestre_id)
 
+        # Verificar se a disciplina tem um professor associado
+        if not DisciplinaProfessor.objects.filter(disciplina=disciplina).exists():
+            messages.error(request, f"A disciplina {disciplina.nome} não possui professores associados.")
+            return HttpResponseRedirect(reverse('horarios_disciplinas'))
+
         try:
-            # Verificar se o professor já está alocado no mesmo horário, dia e ano/semestre
-            conflito_alocacao = HorariosDisciplinas.objects.filter(
-                disciplina_professor__professor=disciplina_professor.professor,
+            # Verifica se a disciplina já está alocada no mesmo dia e horário em qualquer período
+            conflito_disciplina = HorariosDisciplinas.objects.filter(
+                disciplina=disciplina,
+                dia_semana=dia_semana,
                 horario_curso__hora_inicio=horario.hora_inicio,
                 horario_curso__hora_fim=horario.hora_fim,
-                dia_semana=dia_semana,
                 ano_semestre=ano_semestre
             ).exists()
 
-            if conflito_alocacao:
-                # Se já existir uma alocação para o professor no mesmo horário, dia e ano/semestre, impedir a criação
-                messages.error(request, f"O professor {disciplina_professor.professor.nome} já está alocado no mesmo dia e horário.")
+            if conflito_disciplina:
+                messages.error(request, f"A disciplina {disciplina.nome} já está alocada no dia {dia_semana.nome} no horário {horario.hora_inicio}-{horario.hora_fim} em outro período.")
                 return HttpResponseRedirect(reverse('horarios_disciplinas'))
 
-            # Verificar se já existe uma alocação no mesmo dia, horário e período (independentemente do professor)
+            # Verifica se já existe uma alocação no horário, dia, período e ano_semestre
             alocacao_existente = HorariosDisciplinas.objects.filter(
-                horario_curso=horario,
-                dia_semana=dia_semana,
-                periodo=periodo,
-                ano_semestre=ano_semestre
-            ).exclude(disciplina_professor=None).exists()
-
-            if alocacao_existente:
-                # Impedir a criação se já existir uma alocação para aquele dia, horário e período
-                messages.error(request, f"Já existe uma alocação para o dia {dia_semana.nome}, horário {horario.hora_inicio}-{horario.hora_fim} e período {periodo}.")
-                return HttpResponseRedirect(reverse('horarios_disciplinas'))
-
-            # Verificar se já existe uma alocação sem professor
-            alocacao_sem_professor = HorariosDisciplinas.objects.filter(
                 horario_curso=horario,
                 dia_semana=dia_semana,
                 periodo=periodo,
                 ano_semestre=ano_semestre
             ).first()
 
-            if alocacao_sem_professor and alocacao_sem_professor.disciplina_professor is None:
-                # Atualiza a alocação existente com o professor selecionado
-                alocacao_sem_professor.disciplina_professor = disciplina_professor
-                alocacao_sem_professor.save()
-                print(f"Alocação atualizada: {alocacao_sem_professor}")
-                messages.success(request, 'Alocação atualizada com sucesso.')
-            elif not alocacao_sem_professor:
-                # Cria uma nova alocação se não houver uma alocação existente
+            if alocacao_existente:
+                if alocacao_existente.disciplina is None:
+                    alocacao_existente.disciplina = disciplina
+                    alocacao_existente.save()
+                    messages.success(request, 'Alocação atualizada com sucesso.')
+                else:
+                    messages.error(request, f"Já existe uma alocação para a disciplina {alocacao_existente.disciplina.nome} no dia {dia_semana.nome}, horário {horario.hora_inicio}-{horario.hora_fim} e período {periodo}.")
+                return HttpResponseRedirect(reverse('horarios_disciplinas'))
+            else:
                 nova_alocacao = HorariosDisciplinas.objects.create(
-                    disciplina_professor=disciplina_professor,
+                    disciplina=disciplina,
                     horario_curso=horario,
                     ano_semestre=ano_semestre,
                     periodo=periodo,
                     dia_semana=dia_semana
                 )
-                print(f"Nova alocação criada: {nova_alocacao}")
                 messages.success(request, 'Nova alocação criada com sucesso.')
-            else:
-                print("Alocação já existente.")
-                messages.warning(request, 'Alocação já existente.')
 
             return HttpResponseRedirect(reverse('horarios_disciplinas'))
 
         except Exception as e:
-            print(f"Erro ao salvar alocação para {dia_semana.nome} no período {periodo}. Detalhes do erro: {str(e)}")
             return JsonResponse({'success': False, 'message': f'Erro ao alocar disciplina: {str(e)}'}, status=500)
 
     return JsonResponse({'success': False, 'message': 'Método não permitido!'}, status=405)

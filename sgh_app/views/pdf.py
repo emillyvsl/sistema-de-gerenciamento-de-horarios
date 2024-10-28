@@ -25,10 +25,9 @@ def gerar_pdf(request):
 
     # Obter os horários com a relação para os dias da semana, filtrando pelo curso atual
     horarios = HorariosDisciplinas.objects.filter(
-        horario_curso__curso=curso  # Filtro pelo curso atual
+        horario_curso__curso=curso
     ).select_related(
-        'disciplina_professor__disciplina',
-        'disciplina_professor__professor',
+        'disciplina',
         'ano_semestre',
         'horario_curso'
     ).prefetch_related('horario_curso__dias_semana')
@@ -45,13 +44,11 @@ def gerar_pdf(request):
         except AnoSemestre.DoesNotExist:
             horarios = None
 
-    # Adicionar alocações ao contexto e evitar duplicação de horários
     horarios_unicos = []
     horarios_vistos = set()
 
     if horarios:
         for horario in horarios:
-            # Criar uma "chave" que represente as informações essenciais para evitar duplicação
             chave_horario = (
                 horario.horario_curso.hora_inicio,
                 horario.horario_curso.hora_fim,
@@ -59,21 +56,18 @@ def gerar_pdf(request):
                 tuple(dia.nome for dia in horario.horario_curso.dias_semana.all())
             )
 
-            # Se essa chave não foi vista antes, adicionar o horário aos horários únicos
             if chave_horario not in horarios_vistos:
                 horarios_vistos.add(chave_horario)
                 horarios_unicos.append(horario)
 
-                # Obter todas as alocações para o HorarioCurso, **filtrando pelo ano_semestre correto**
                 alocacoes = HorariosDisciplinas.objects.filter(
                     horario_curso=horario.horario_curso,
-                    ano_semestre=horario.ano_semestre  # Filtrar pela relação correta de ano_semestre
+                    ano_semestre=horario.ano_semestre
                 )
-                horario.alocacoes_list = alocacoes  # Passa todas as alocações desse horário
+                horario.alocacoes_list = alocacoes
 
     colspan_value = len(dias_semana) + 2
 
-    # Preparar o contexto do template
     context = {
         'horarios': horarios_unicos,
         'semestres': semestres,
@@ -82,15 +76,12 @@ def gerar_pdf(request):
         'pesquisa_realizada': pesquisa_realizada,
     }
 
-    # Renderizar o template HTML para o PDF
     template = get_template('horarios/horarios_disciplinas_pdf.html')
     html_content = template.render(context)
 
-    # Gerar o PDF usando WeasyPrint
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="horarios_disciplina.pdf"'
 
-    # Converter HTML para PDF
     HTML(string=html_content).write_pdf(response)
 
     return response
