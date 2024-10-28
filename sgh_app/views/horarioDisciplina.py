@@ -6,7 +6,7 @@ from sgh_app.models.horarios_disciplinas import HorariosDisciplinas
 from sgh_app.models.horario_curso import HorarioCurso
 from sgh_app.models.semestre import Semestre
 from sgh_app.models.ano_semestre import AnoSemestre
-from sgh_app.models.disciplina_professor import DisciplinaProfessor
+from sgh_app.models.preferencias import Preferencias  # Importar Preferencias
 
 @login_required
 def horarioDisciplina(request):
@@ -23,7 +23,6 @@ def horarioDisciplina(request):
     dias_semana = DiasSemana.objects.all()
     pesquisa_realizada = False
 
-    # Obter os horários filtrados pelo curso e ano/semestre
     horarios = HorariosDisciplinas.objects.filter(
         horario_curso__curso=curso
     ).select_related(
@@ -31,8 +30,9 @@ def horarioDisciplina(request):
         'ano_semestre',
         'horario_curso'
     ).prefetch_related(
-        'disciplina__disciplina_professores__professor',  # Carregar professores para cada disciplina
-        'horario_curso__dias_semana'
+        'disciplina__disciplina_professores__professor',  
+        'horario_curso__dias_semana',
+        'disciplina__disciplina_professores__professor__preferencias'
     )
 
     if ano and semestre_id:
@@ -63,7 +63,6 @@ def horarioDisciplina(request):
                 horarios_vistos.add(chave_horario)
                 horarios_unicos.append(horario)
 
-                # Adicionar todas as alocações correspondentes ao horário, dia e ano_semestre
                 alocacoes = HorariosDisciplinas.objects.filter(
                     horario_curso=horario.horario_curso,
                     ano_semestre=horario.ano_semestre
@@ -72,12 +71,16 @@ def horarioDisciplina(request):
 
     colspan_value = len(dias_semana) + 2
 
+    # Obter preferências de cada professor para serem passadas ao contexto
+    preferencias_professores = Preferencias.objects.all()
+
     context = {
         'horarios': horarios_unicos,
         'semestres': semestres,
         'pesquisa_realizada': pesquisa_realizada,
         'dias_semana': dias_semana,
         'colspan_value': colspan_value,
+        'preferencias_professores': preferencias_professores,
     }
 
     return render(request, 'horarios/horarios_disciplinas.html', context)

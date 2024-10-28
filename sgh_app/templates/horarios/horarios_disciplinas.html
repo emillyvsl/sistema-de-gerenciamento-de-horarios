@@ -7,8 +7,7 @@
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <label for="ano">Ano:</label>
-                    <input type="number" id="ano" name="ano" class="form-control" 
-                           placeholder="Informe o Ano" value="{{ request.GET.ano }}">
+                    <input type="number" id="ano" name="ano" class="form-control" placeholder="Informe o Ano" value="{{ request.GET.ano }}">
                 </div>
                 <div class="col-md-6">
                     <label for="semestre">Semestre:</label>
@@ -82,6 +81,14 @@
                                     {% else %}
                                         <p>Sem disciplinas</p>
                                     {% endif %}
+                                    
+                                    <!-- Verificar preferências dos professores -->
+                                    {% for preferencia in preferencias_professores %}
+                                        {% if dia in preferencia.dias_preferidos.all and horario.horario_curso in preferencia.horas_preferidas.all %}
+                                            <span class="badge badge-info">Preferência de {{ preferencia.professor.nome }}</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
                                     <a href="{% url 'alocar_disciplina' horario.horario_curso.id dia.id periodo.grouper %}" class="btn btn-secondary btn-sm">
                                         Alocar Disciplina
                                     </a>
@@ -102,6 +109,27 @@
         </table>
     </div>
 </div>
-
 {% endblock %}
 
+<style>
+    .content-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .table {
+        margin-top: 20px;
+    }
+    h2 {
+        margin-top: 20px;
+    }
+    .badge-info {
+        background-color: #17a2b8;
+        color: white;
+        padding: 4px 6px;
+        font-size: 0.9em;
+    }
+</style>
