@@ -17,6 +17,8 @@ from sgh_app.models.horarios_disciplinas import HorariosDisciplinas
 def horarios_curso(request):
     return render(request, 'horarios/horario_curso.html')
 
+from datetime import time
+
 @login_required
 def horarios_adicionar(request):
     coordenacao = request.user.coordenacao
@@ -24,11 +26,26 @@ def horarios_adicionar(request):
 
     if request.method == 'POST':
         dias_ids = request.POST.getlist('dias_semana')
-        hora_inicio = request.POST['hora_inicio']
-        hora_fim = request.POST['hora_fim']
+        hora_inicio = time.fromisoformat(request.POST['hora_inicio'])
+        hora_fim = time.fromisoformat(request.POST['hora_fim'])
 
         # Obtenha os dias selecionados
         dias = DiasSemana.objects.filter(id__in=dias_ids)
+
+        # Verificar sobreposição de horário
+        for dia in dias:
+            horarios_existentes = HorarioCurso.objects.filter(
+                curso=curso,
+                dias_semana=dia
+            )
+            for horario in horarios_existentes:
+                # Checar se o novo horário sobrepõe algum horário existente
+                if (hora_inicio < horario.hora_fim and hora_fim > horario.hora_inicio):
+                    messages.error(
+                        request,
+                        f"Conflito de horário: o intervalo {hora_inicio} - {hora_fim} já está ocupado no dia {dia.nome}."
+                    )
+                    return redirect('horarios_adicionar')
 
         # Crie um único horário para todos os dias selecionados
         novo_horario = HorarioCurso.objects.create(
@@ -62,18 +79,37 @@ def horarios_adicionar(request):
 @login_required
 def horarios_editar(request, horario_id):
     horario = get_object_or_404(HorarioCurso, id=horario_id)
+    curso = horario.curso  # Obter o curso associado ao horário
 
     if request.method == 'POST':
-        # Atualizar horário de início e fim
-        horario.hora_inicio = request.POST['hora_inicio']
-        horario.hora_fim = request.POST['hora_fim']
-
-        # Atualizar dias da semana
+        # Obtenha os novos valores de início e fim
+        hora_inicio = time.fromisoformat(request.POST['hora_inicio'])
+        hora_fim = time.fromisoformat(request.POST['hora_fim'])
         dias_ids = request.POST.getlist('dias_semana')
         dias = DiasSemana.objects.filter(id__in=dias_ids)
-        horario.dias_semana.set(dias)
 
+        # Verificar sobreposição de horário, ignorando o horário atual que está sendo editado
+        for dia in dias:
+            horarios_existentes = HorarioCurso.objects.filter(
+                curso=curso,
+                dias_semana=dia
+            ).exclude(id=horario_id)  # Excluir o horário atual da verificação
+
+            for horario_existente in horarios_existentes:
+                # Verificar se o novo intervalo sobrepõe algum horário existente
+                if (hora_inicio < horario_existente.hora_fim and hora_fim > horario_existente.hora_inicio):
+                    messages.error(
+                        request,
+                        f"Conflito de horário: o intervalo {hora_inicio} - {hora_fim} já está ocupado no dia {dia.nome}."
+                    )
+                    return redirect('horarios_adicionar')
+
+        # Se não houver conflitos, atualizar o horário existente
+        horario.hora_inicio = hora_inicio
+        horario.hora_fim = hora_fim
+        horario.dias_semana.set(dias)
         horario.save()
+
         messages.success(request, 'Horário editado com sucesso!')
         return redirect('horarios_adicionar')  # Redireciona para a lista de horários
 
