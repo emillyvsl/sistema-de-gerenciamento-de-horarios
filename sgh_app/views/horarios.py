@@ -1,3 +1,4 @@
+import json
 from django.forms import modelform_factory
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
@@ -40,12 +41,15 @@ def horarios_adicionar(request):
         novo_horario.dias_semana.set(dias)  # Associa todos os dias de uma vez
         novo_horario.save()
 
-
         messages.success(request, 'Horários e quadro de horários adicionados com sucesso!')
         return redirect('horarios_adicionar')
 
     dias = DiasSemana.objects.all()
     horarios_curso = HorarioCurso.objects.filter(curso=curso)
+
+    # Adiciona os dias da semana associados a cada horário em formato JSON
+    for horario in horarios_curso:
+        horario.dias_semana_json = json.dumps(list(horario.dias_semana.values_list('id', flat=True)))
 
     return render(request, 'horarios/horario_adicionar.html', {
         'dias': dias,
@@ -60,11 +64,20 @@ def horarios_editar(request, horario_id):
     horario = get_object_or_404(HorarioCurso, id=horario_id)
 
     if request.method == 'POST':
+        # Atualizar horário de início e fim
         horario.hora_inicio = request.POST['hora_inicio']
         horario.hora_fim = request.POST['hora_fim']
+
+        # Atualizar dias da semana
+        dias_ids = request.POST.getlist('dias_semana')
+        dias = DiasSemana.objects.filter(id__in=dias_ids)
+        horario.dias_semana.set(dias)
+
         horario.save()
         messages.success(request, 'Horário editado com sucesso!')
         return redirect('horarios_adicionar')  # Redireciona para a lista de horários
+
+
 
 
 @login_required
