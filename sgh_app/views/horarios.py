@@ -31,7 +31,12 @@ def horarios_adicionar(request):
 
         # Verificação: deve haver pelo menos um dia selecionado
         if not dias_ids:
-            messages.error(request, "Selecione pelo menos um dia da semana.")
+            messages.error(request, "Erro ao adicionar horário, selecione pelo menos um dia da semana.")
+            return redirect('horarios_adicionar')
+
+        # Verificação: horário de fim não pode ser anterior ao horário de início
+        if hora_fim <= hora_inicio:
+            messages.error(request, "Erro ao adicionar horário, o horário de fim deve ser posterior ao horário de início.")
             return redirect('horarios_adicionar')
 
         # Obtenha os dias selecionados
@@ -48,7 +53,7 @@ def horarios_adicionar(request):
                 if (hora_inicio < horario.hora_fim and hora_fim > horario.hora_inicio):
                     messages.error(
                         request,
-                        f"Conflito de horário: o intervalo {hora_inicio} - {hora_fim} já está ocupado no dia {dia.nome}."
+                        f"Erro ao adicionar horário, Conflito de horário: o intervalo {hora_inicio} - {hora_fim} já está ocupado no dia {dia.nome}."
                     )
                     return redirect('horarios_adicionar')
 
@@ -92,7 +97,12 @@ def horarios_editar(request, horario_id):
 
         # Verificação: não permitir que todos os dias sejam desmarcados
         if not dias_ids:
-            messages.error(request, "O horário deve estar associado a pelo menos um dia da semana.")
+            messages.error(request, "Erro ao editar, o horário deve estar associado a pelo menos um dia da semana.")
+            return redirect('horarios_adicionar')
+
+        # Verificação: horário de fim não pode ser anterior ao horário de início
+        if hora_fim <= hora_inicio:
+            messages.error(request, "Erro ao editar, o horário de fim deve ser posterior ao horário de início.")
             return redirect('horarios_adicionar')
 
         dias = DiasSemana.objects.filter(id__in=dias_ids)
@@ -109,7 +119,7 @@ def horarios_editar(request, horario_id):
                 if (hora_inicio < horario_existente.hora_fim and hora_fim > horario_existente.hora_inicio):
                     messages.error(
                         request,
-                        f"Conflito de horário: o intervalo {hora_inicio} - {hora_fim} já está ocupado no dia {dia.nome}."
+                        f"Erro ao editar, Conflito de horário: o intervalo {hora_inicio} - {hora_fim} já está ocupado no dia {dia.nome}."
                     )
                     return redirect('horarios_adicionar')
 
