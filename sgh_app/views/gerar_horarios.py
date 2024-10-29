@@ -17,22 +17,29 @@ def gerenciar_horarios(request):
     return render(request, 'gerenciar_horarios.html', {
         'anos_semestres': anos_semestres
     })
+
 @login_required
 def gerar_horarios(request):
     semestres = Semestre.objects.all()
     periodo_opcoes = []
 
+    coordenacao = request.user.coordenacao
+    if not coordenacao:
+        messages.error(request, "Acesso negado: você não possui coordenação associada.")
+        return redirect('horarios_disciplinas')
+
+    curso = coordenacao.curso
+
+    # Verificar se existem horários para o curso antes de renderizar a página
+    horarios_curso = HorarioCurso.objects.filter(curso=curso)
+    if not horarios_curso.exists():
+        messages.error(request, "Não existem horários cadastrados para o seu curso. Cadastre horários primeiro.")
+        return redirect('horarios_disciplinas')  # Redirecione para a página inicial ou outra página apropriada
+
     if request.method == 'POST':
         ano = request.POST['ano']
         semestre_id = request.POST['semestre']
         paridade = request.POST['paridade']
-
-        coordenacao = request.user.coordenacao
-        if not coordenacao:
-            messages.error(request, "Acesso negado: você não possui coordenação associada.")
-            return redirect('home')
-
-        curso = coordenacao.curso
 
         if AnoSemestre.objects.filter(ano=ano, semestre_id=semestre_id, curso=curso).exists():
             messages.warning(request, "Esse ano já foi cadastrado neste semestre para o seu curso.")
@@ -46,7 +53,6 @@ def gerar_horarios(request):
                 if (paridade == 'par' and p % 2 == 0) or (paridade == 'impar' and p % 2 != 0):
                     periodo_opcoes.append(p)
 
-        horarios_curso = HorarioCurso.objects.filter(curso=curso)
         dias_semana = DiasSemana.objects.all()
 
         for horario_curso in horarios_curso:
@@ -78,6 +84,8 @@ def gerar_horarios(request):
         'semestres': semestres,
         'periodo_opcoes': periodo_opcoes,
     })
+
+
 @login_required
 def quadro_horarios(request, ano_semestre_id):
     ano_semestre = get_object_or_404(AnoSemestre, id=ano_semestre_id)
