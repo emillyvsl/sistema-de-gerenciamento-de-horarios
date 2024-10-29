@@ -29,6 +29,11 @@ def horarios_adicionar(request):
         hora_inicio = time.fromisoformat(request.POST['hora_inicio'])
         hora_fim = time.fromisoformat(request.POST['hora_fim'])
 
+        # Verificação: deve haver pelo menos um dia selecionado
+        if not dias_ids:
+            messages.error(request, "Selecione pelo menos um dia da semana.")
+            return redirect('horarios_adicionar')
+
         # Obtenha os dias selecionados
         dias = DiasSemana.objects.filter(id__in=dias_ids)
 
@@ -74,8 +79,6 @@ def horarios_adicionar(request):
         'curso': curso
     })
 
-
-
 @login_required
 def horarios_editar(request, horario_id):
     horario = get_object_or_404(HorarioCurso, id=horario_id)
@@ -86,6 +89,12 @@ def horarios_editar(request, horario_id):
         hora_inicio = time.fromisoformat(request.POST['hora_inicio'])
         hora_fim = time.fromisoformat(request.POST['hora_fim'])
         dias_ids = request.POST.getlist('dias_semana')
+
+        # Verificação: não permitir que todos os dias sejam desmarcados
+        if not dias_ids:
+            messages.error(request, "O horário deve estar associado a pelo menos um dia da semana.")
+            return redirect('horarios_adicionar')
+
         dias = DiasSemana.objects.filter(id__in=dias_ids)
 
         # Verificar sobreposição de horário, ignorando o horário atual que está sendo editado
@@ -112,8 +121,6 @@ def horarios_editar(request, horario_id):
 
         messages.success(request, 'Horário editado com sucesso!')
         return redirect('horarios_adicionar')  # Redireciona para a lista de horários
-
-
 
 
 @login_required
