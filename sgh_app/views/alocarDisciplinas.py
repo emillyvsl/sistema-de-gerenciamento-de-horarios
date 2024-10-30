@@ -20,7 +20,6 @@ def alocarDisciplina(request, horario_id, dia_id, periodo_id):
     periodo = periodo_id
 
     if request.method == 'GET':
-        # Filtrar disciplinas relacionadas ao curso e com professores associados
         disciplinas_com_professores = Disciplina.objects.filter(
             curso=curso, disciplina_professores__isnull=False
         ).distinct()
@@ -54,14 +53,12 @@ def alocarDisciplina(request, horario_id, dia_id, periodo_id):
         disciplina = get_object_or_404(Disciplina, id=disciplina_id)
         ano_semestre = get_object_or_404(AnoSemestre, id=ano_semestre_id)
 
-        # Verificar se a disciplina tem um professor associado
         professores = DisciplinaProfessor.objects.filter(disciplina=disciplina)
         if not professores.exists():
             messages.error(request, f"A disciplina {disciplina.nome} não possui professores associados.")
             return HttpResponseRedirect(reverse('horarios_disciplinas'))
 
         try:
-            # Verifica se a disciplina já está alocada no mesmo dia e horário em qualquer período
             conflito_disciplina = HorariosDisciplinas.objects.filter(
                 disciplina=disciplina,
                 dia_semana=dia_semana,
@@ -74,7 +71,6 @@ def alocarDisciplina(request, horario_id, dia_id, periodo_id):
                 messages.error(request, f"A disciplina {disciplina.nome} já está alocada no dia {dia_semana.nome} no horário {horario.hora_inicio}-{horario.hora_fim} em outro período.")
                 return HttpResponseRedirect(reverse('horarios_disciplinas'))
 
-            # Verifica se algum professor já está alocado no mesmo horário e dia em outro período
             for professor in professores:
                 conflito_professor = HorariosDisciplinas.objects.filter(
                     disciplina__disciplina_professores__professor=professor.professor,
@@ -88,7 +84,6 @@ def alocarDisciplina(request, horario_id, dia_id, periodo_id):
                     messages.error(request, f"O professor {professor.professor.nome} já está alocado no mesmo horário e dia em outro período.")
                     return HttpResponseRedirect(reverse('horarios_disciplinas'))
 
-            # Verifica se já existe uma alocação no horário, dia, período e ano_semestre
             alocacao_existente = HorariosDisciplinas.objects.filter(
                 horario_curso=horario,
                 dia_semana=dia_semana,
@@ -99,6 +94,7 @@ def alocarDisciplina(request, horario_id, dia_id, periodo_id):
             if alocacao_existente:
                 if alocacao_existente.disciplina is None:
                     alocacao_existente.disciplina = disciplina
+                    alocacao_existente.curso = curso  # Adicionando curso à alocação existente
                     alocacao_existente.save()
                     messages.success(request, 'Alocação atualizada com sucesso.')
                 else:
@@ -110,7 +106,8 @@ def alocarDisciplina(request, horario_id, dia_id, periodo_id):
                     horario_curso=horario,
                     ano_semestre=ano_semestre,
                     periodo=periodo,
-                    dia_semana=dia_semana
+                    dia_semana=dia_semana,
+                    curso=curso  # Inclui o curso na nova alocação
                 )
                 messages.success(request, 'Nova alocação criada com sucesso.')
 

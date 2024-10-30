@@ -30,7 +30,7 @@ def horarioDisciplina(request):
         'ano_semestre',
         'horario_curso'
     ).prefetch_related(
-        'disciplina__disciplina_professores__professor',  
+        'disciplina__disciplina_professores__professor',
         'horario_curso__dias_semana',
         'disciplina__disciplina_professores__professor__preferencias'
     )
@@ -47,6 +47,7 @@ def horarioDisciplina(request):
             horarios = None
             messages.warning(request, "Nenhum ano/semestre encontrado.")
 
+    # Processa horários únicos e insere placeholders para horários sem alocações
     horarios_unicos = []
     horarios_vistos = set()
 
@@ -63,15 +64,17 @@ def horarioDisciplina(request):
                 horarios_vistos.add(chave_horario)
                 horarios_unicos.append(horario)
 
+                # Inclui placeholders para manter a linha visível, mesmo sem alocações
                 alocacoes = HorariosDisciplinas.objects.filter(
                     horario_curso=horario.horario_curso,
-                    ano_semestre=horario.ano_semestre
-                )
-                horario.alocacoes_list = alocacoes
+                    ano_semestre=horario.ano_semestre,
+                    periodo=horario.periodo
+                ).select_related('disciplina', 'dia_semana')
+
+                # Adiciona lista vazia se não houver alocações para o horário específico
+                horario.alocacoes_list = alocacoes if alocacoes.exists() else [{'disciplina': None}]
 
     colspan_value = len(dias_semana) + 2
-
-    # Obter preferências de cada professor para serem passadas ao contexto
     preferencias_professores = Preferencias.objects.all()
 
     context = {
@@ -84,3 +87,22 @@ def horarioDisciplina(request):
     }
 
     return render(request, 'horarios/horarios_disciplinas.html', context)
+
+@login_required
+def remover_alocacao(request, alocacao_id):
+    # Obter a alocação específica ou retornar 404 se não existir
+    alocacao = get_object_or_404(HorariosDisciplinas, id=alocacao_id)
+
+    if request.method == 'POST':
+        # Remove a alocação do banco de dados
+        alocacao.delete()
+        
+        # Exibir uma mensagem de sucesso para o usuário
+        messages.success(request, 'Alocação removida com sucesso.')
+
+        # Redirecionar de volta para a página de horários
+        return redirect('horarios_disciplinas')
+    
+    # Se a solicitação não for POST, exibe uma mensagem de erro
+    messages.error(request, 'Método de requisição inválido.')
+    return redirect('horarios_disciplinas')
