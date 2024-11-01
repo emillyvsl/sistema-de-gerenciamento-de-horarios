@@ -1,53 +1,53 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5 mb-5">
-    <div class="content-wrapper p-4">
-        <!-- Formulário de seleção de ano e semestre -->
-        <form method="GET" action="">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <label for="ano">Ano:</label>
-                    <input type="number" id="ano" name="ano" class="form-control" placeholder="Informe o Ano" value="{{ request.GET.ano }}">
-                </div>
-                <div class="col-md-6">
-                    <label for="semestre">Semestre:</label>
-                    <select id="semestre" name="semestre" class="form-control">
-                        <option value="" disabled selected>Informe o Semestre</option>
-                        {% for semestre in semestres %}
-                            <option value="{{ semestre.id }}" {% if semestre.id == request.GET.semestre %}selected{% endif %}>
-                                {{ semestre.get_nome_display }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
+<div class="mt-5 mb-5 px-4">
+    <!-- Formulário de seleção de ano e semestre -->
+    <form method="GET" action="" class="mb-4">
+        <div class="row align-items-end">
+            <div class="col-md-4">
+                <label for="ano">Ano:</label>
+                <input type="number" id="ano" name="ano" class="form-control" placeholder="Informe o Ano" value="{{ request.GET.ano }}">
             </div>
-            <br>
-            <div class="d-flex justify-content-between align-items-center">
-                <button type="submit" class="btn btn-primary">Pesquisar</button>
-                <div>
-                    <a href="{% url 'gerar_horarios' %}" class="btn btn-primary mr-2">Gerar Horários</a>
-                    <a href="{% url 'gerar_pdf' %}?ano={{ request.GET.ano }}&semestre={{ request.GET.semestre }}" class="btn btn-primary">Baixar Horários em PDF</a>
-                </div>
+            <div class="col-md-4">
+                <label for="semestre">Semestre:</label>
+                <select id="semestre" name="semestre" class="form-control">
+                    <option value="" disabled selected>Informe o Semestre</option>
+                    {% for semestre in semestres %}
+                        <option value="{{ semestre.id }}" {% if semestre.id == request.GET.semestre %}selected{% endif %}>
+                            {{ semestre.get_nome_display }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
-        </form>
+            <div class="col-md-4 d-flex justify-content-start">
+                <button type="submit" class="btn btn-primary mt-auto">Pesquisar</button>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end mt-3">
+            <a href="{% url 'gerar_horarios' %}" class="btn btn-primary mr-2">Gerar Horários</a>
+            <a href="{% url 'gerar_pdf' %}?ano={{ request.GET.ano }}&semestre={{ request.GET.semestre }}" class="btn btn-primary">Baixar Horários em PDF</a>
+        </div>
+    </form>
 
-        {% if horarios %}
-            {% with horario=horarios.0 %}
-                <h2 class="text-center mt-4">Quadro de Horários do {{ horario.ano_semestre.semestre }} do Ano {{ horario.ano_semestre.ano }}</h2>
-            {% endwith %}
-        {% else %}
-            <h2 class="text-center mt-4">Quadro de Horários</h2>
-            <p class="text-center">Nenhum horário encontrado para o último semestre.</p>
-        {% endif %}
+    {% if horarios %}
+        {% with horario=horarios.0 %}
+            <h2 class="text-center mt-4">Quadro de Horários do {{ horario.ano_semestre.semestre }} do Ano {{ horario.ano_semestre.ano }}</h2>
+        {% endwith %}
+    {% else %}
+        <h2 class="text-center mt-4">Quadro de Horários</h2>
+        <p class="text-center">Nenhum horário encontrado para o último semestre.</p>
+    {% endif %}
 
-        <table class="table table-bordered mt-4">
+    <!-- Tabela de Horários -->
+    <div class="table-responsive">
+        <table class="table table-bordered w-100 custom-table">
             <thead>
                 <tr>
                     <th>Período</th>
                     <th>Horário(s)</th>
                     {% for dia in dias_semana %}
-                        <th class="dia-coluna">{{ dia.nome }}</th>
+                        <th>{{ dia.nome }}</th>
                     {% endfor %}
                 </tr>
             </thead>
@@ -58,36 +58,36 @@
                     {% for horario in periodo.list %}
                     <tr>
                         {% if forloop.first %}
-                            <td rowspan="{{ periodo.list|length }}">{{ periodo.grouper }}</td>
+                            <td rowspan="{{ periodo.list|length }}" class="align-middle">{{ periodo.grouper }}</td>
                         {% endif %}
                         
                         <td>{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
 
                         {% for dia in dias_semana %}
-                            <td class="dia-coluna">
+                            <td class="align-middle">
                                 {% if dia in horario.horario_curso.dias_semana.all %}
                                     {% with alocacao_encontrada=False %}
                                         {% for alocacao in horario.alocacoes_list %}
                                             {% if alocacao.dia_semana == dia and alocacao.periodo == periodo.grouper %}
                                                 {% if alocacao.disciplina %}
-                                                    <div class="disciplina-info">
-                                                        <strong class="alocacao-disciplina">{{ alocacao.disciplina.nome }}</strong>
+                                                    <div class="d-flex align-items-center">
+                                                        <strong class="mr-2">{{ alocacao.disciplina.nome }}</strong>
+                                                        <a href="#" onclick="removerAlocacao({{ alocacao.id }})" title="Remover Alocação">
+                                                            <i class="fa fa-trash text-red"></i>
+                                                        </a>
                                                         
-                                                        {% if alocacao.disciplina.disciplina_professores.all %}
-                                                            <span class="alocacao-professores">
-                                                                {% for prof in alocacao.disciplina.disciplina_professores.all %}
-                                                                    {{ prof.professor.nome }}{% if not forloop.last %}, {% endif %}
-                                                                {% endfor %}
-                                                            </span>
-                                                        {% endif %}
-                                                        
-                                                        <form action="{% url 'remover_alocacao' alocacao.id %}" method="POST" class="remove-form">
+                                                        <form id="remover-form-{{ alocacao.id }}" action="{% url 'remover_alocacao' alocacao.id %}" method="POST" style="display: none;">
                                                             {% csrf_token %}
-                                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                                <i class="fa fa-trash"></i>
-                                                            </button>
                                                         </form>
                                                     </div>
+                                                    {% if alocacao.disciplina.disciplina_professores.all %}
+                                                        <small class="text-muted">
+                                                            Professor(es): 
+                                                            {% for prof in alocacao.disciplina.disciplina_professores.all %}
+                                                                {{ prof.professor.nome }}{% if not forloop.last %}, {% endif %}
+                                                            {% endfor %}
+                                                        </small>
+                                                    {% endif %}
                                                     {% with alocacao_encontrada=True %}
                                                     {% endwith %}
                                                 {% endif %}
@@ -95,22 +95,22 @@
                                         {% endfor %}
 
                                         {% if not alocacao_encontrada %}
-                                            <div class="alocacao-actions">
-                                                <a href="{% url 'alocar_disciplina' horario.horario_curso.id dia.id periodo.grouper %}" class="btn btn-secondary btn-sm">
-                                                    Alocar Disciplina
-                                                </a>
-                                                {% for preferencia in preferencias_professores %}
-                                                    {% if dia in preferencia.dias_preferidos.all and horario.horario_curso in preferencia.horas_preferidas.all %}
-                                                        <span class="badge badge-info" title="Preferência de {{ preferencia.professor.nome }}">
-                                                            <i class="fa fa-exclamation-circle text-success"></i>
-                                                        </span>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </div>
+                                        <div class="alocacao-actions">
+                                            <a href="{% url 'alocar_disciplina' horario.horario_curso.id dia.id periodo.grouper %}" class="btn btn-secondary btn-sm">
+                                                Adicionar Disciplina
+                                            </a>
+                                            {% for preferencia in preferencias_professores %}
+                                                {% if dia in preferencia.dias_preferidos.all and horario.horario_curso in preferencia.horas_preferidas.all %}
+                                                    <span class="badge badge-info" title="Preferência de {{ preferencia.professor.nome }}">
+                                                        <i class="fa fa-exclamation-circle text-white"></i> <!-- Ícone com cor branca -->
+                                                    </span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
                                         {% endif %}
                                     {% endwith %}
                                 {% else %}
-                                    <p>Sem Aula</p>
+                                    <span class="text-muted">Sem Aula</span>
                                 {% endif %}
                             </td>
                         {% endfor %}
@@ -119,13 +119,40 @@
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="{{ colspan_value }}">Nenhum horário encontrado.</td>
+                    <td colspan="{{ dias_semana|length|add:"2" }}" class="text-center">Nenhum horário encontrado.</td>
                 </tr>
             {% endif %}
-            
             </tbody>
         </table>
     </div>
 </div>
-{% endblock %}
 
+<style>
+    .custom-table thead {
+        background-color: #b0c4de; /* Azul mais escuro para o cabeçalho */
+        color: #ffffff; /* Texto branco no cabeçalho */
+    }
+    
+    .text-red {
+        color: #ff0000; /* Define o vermelho específico */
+    }
+    
+    .badge-info i.fa-exclamation-circle {
+        color: white; 
+    }
+    
+    .badge-info {
+        background-color: red; 
+        color: red; 
+    }
+</style>
+
+<script>
+    function removerAlocacao(id) {
+        event.preventDefault();
+        if (confirm("Tem certeza de que deseja remover esta alocação?")) {
+            document.getElementById(`remover-form-${id}`).submit();
+        }
+    }
+</script>
+{% endblock %}
