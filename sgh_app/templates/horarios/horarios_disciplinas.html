@@ -26,7 +26,14 @@
         </div>
         <div class="d-flex justify-content-end mt-3">
             <a href="{% url 'gerar_horarios' %}" class="btn btn-primary mr-2">Gerar Horários</a>
-            <a href="{% url 'gerar_pdf' %}?ano={{ request.GET.ano }}&semestre={{ request.GET.semestre }}" class="btn btn-primary">Baixar Horários em PDF</a>
+            <a href="{% url 'gerar_pdf' %}?ano={{ request.GET.ano }}&semestre={{ request.GET.semestre }}" class="btn btn-primary mr-2">Baixar Horários em PDF</a>
+            {% if horarios %}
+                {% with horario=horarios.0 %}
+                    <a href="{% url 'excluir_quadro_horarios' horario.ano_semestre.id %}" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir este quadro de horários? Esta ação é irreversível.')">
+                        Excluir Quadro de Horários
+                    </a>
+                {% endwith %}
+            {% endif %}
         </div>
     </form>
 

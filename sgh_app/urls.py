@@ -3,7 +3,7 @@ from sgh_app.views.alocarDisciplinas import alocarDisciplina
 from sgh_app.views.detalhesProfessor import detalhes_professor
 from sgh_app.views.disciplinaProfessor import adicionar_disciplina_professor, remover_disciplina_professor
 from sgh_app.views.disciplinas import editar_disciplina, excluir_disciplina, listar_disciplinas
-from sgh_app.views.gerar_horarios import gerar_horarios, gerenciar_horarios, quadro_horarios
+from sgh_app.views.gerar_horarios import excluir_quadro_horarios, gerar_horarios, gerenciar_horarios, quadro_horarios
 from sgh_app.views.horarioDisciplina import horarioDisciplina, remover_alocacao
 from sgh_app.views.pdf import gerar_pdf
 from sgh_app.views.preferenciaProfessor import adicionar_preferencia_professor, buscar_dias_relacionados, remover_preferencia_professor
@@ -41,6 +41,7 @@ urlpatterns = [
     path('quadro/<int:ano_semestre_id>/', quadro_horarios, name='quadro_horarios'),
     path('alocar-disciplina/<int:horario_id>/<int:dia_id>/<int:periodo_id>/', alocarDisciplina, name='alocar_disciplina'),
     path('remover-alocacao/<int:alocacao_id>/', remover_alocacao, name='remover_alocacao'),
+    path('excluir-quadro-horarios/<int:ano_semestre_id>/', excluir_quadro_horarios, name='excluir_quadro_horarios'),
 
     path('gerar-pdf/', gerar_pdf, name='gerar_pdf'),
      

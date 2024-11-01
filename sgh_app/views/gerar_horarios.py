@@ -1,8 +1,10 @@
 # gerar_horario.py
 
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.urls import reverse
 
 from sgh_app.models.ano_semestre import AnoSemestre
 from sgh_app.models.dias_semana import DiasSemana
@@ -96,3 +98,17 @@ def quadro_horarios(request, ano_semestre_id):
     return render(request, 'horarios/horarios_disciplinas.html', {
         'horarios': horarios,
     })
+
+
+@login_required
+def excluir_quadro_horarios(request, ano_semestre_id):
+    ano_semestre = get_object_or_404(AnoSemestre, id=ano_semestre_id)
+    
+    # Excluir os horários associados ao ano_semestre
+    HorariosDisciplinas.objects.filter(ano_semestre=ano_semestre).delete()
+    
+    # Excluir o próprio ano_semestre
+    ano_semestre.delete()
+
+    messages.success(request, "Quadro de horários e ano/semestre excluídos com sucesso.")
+    return HttpResponseRedirect(reverse('horarios_disciplinas'))
