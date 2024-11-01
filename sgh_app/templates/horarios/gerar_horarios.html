@@ -1,34 +1,59 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <form method="POST">
-        {% csrf_token %}
-        <label for="ano">Ano:</label>
-        <input type="text" name="ano" id="ano" required>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card p-4" style="width: 100%; max-width: 400px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
+        <h3 class="text-center mb-4">Gerar Quadro de Horários</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="ano">Ano:</label>
+                <input type="text" name="ano" id="ano" class="form-control" required>
+            </div>
 
-        <label for="semestre">Semestre:</label>
-        <select name="semestre" id="semestre" required>
-            <option value="" disabled selected>Selecione um semestre</option>
-            {% for semestre in semestres %}
-                <option value="{{ semestre.id }}">{{ semestre.get_nome_display }}</option>
-            {% endfor %}
-        </select>
+            <div class="form-group">
+                <label for="semestre">Semestre:</label>
+                <select name="semestre" id="semestre" class="form-control" required>
+                    <option value="" disabled selected>Selecione um semestre</option>
+                    {% for semestre in semestres %}
+                        <option value="{{ semestre.id }}">{{ semestre.get_nome_display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <label for="paridade">Escolha o tipo de período:</label>
-        <select name="paridade" id="paridade" required>
-            <option value="par">Pares</option>
-            <option value="impar">Ímpares</option>
-        </select>
+            <div class="form-group">
+                <label for="paridade">Escolha o tipo de período:</label>
+                <select name="paridade" id="paridade" class="form-control" required>
+                    <option value="par">Pares</option>
+                    <option value="impar">Ímpares</option>
+                </select>
+            </div>
 
-        <button type="submit">Gerar Horários</button>
-    </form>
+            <button type="submit" class="btn btn-primary btn-block mt-3">Gerar quadro de horários</button>
+        </form>
 
-    {% if periodo_opcoes %}
-        <h3>Períodos disponíveis:</h3>
-        <ul>
-            {% for periodo in periodo_opcoes %}
-                <li>{{ periodo }}</li>  <!-- Aqui o período é um número -->
-            {% endfor %}
-        </ul>
-    {% endif %}
+        {% if periodo_opcoes %}
+            <h4 class="text-center mt-4">Períodos disponíveis:</h4>
+            <ul class="list-group list-group-flush">
+                {% for periodo in periodo_opcoes %}
+                    <li class="list-group-item text-center">{{ periodo }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 100%;
+    }
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+</style>
 {% endblock %}
