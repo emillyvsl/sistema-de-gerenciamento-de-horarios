@@ -11,6 +11,7 @@ from collections import defaultdict
 from django.core.exceptions import ObjectDoesNotExist
 
 from sgh_app.models.horarios_disciplinas import HorariosDisciplinas
+from sgh_app.models.preferencias import Preferencias
 
 
 @login_required
@@ -138,12 +139,18 @@ def horarios_excluir(request, horario_id):
     horario = get_object_or_404(HorarioCurso, id=horario_id)
     
     if request.method == 'POST':
+        # Excluir as preferências associadas a esse HorarioCurso
+        Preferencias.objects.filter(horas_preferidas=horario).delete()
+        
         # Remover as entradas em HorariosDisciplinas associadas a esse HorarioCurso
         HorariosDisciplinas.objects.filter(horario_curso=horario).delete()
         
         # Excluir o HorarioCurso
         horario.delete()
 
-        messages.success(request, 'Horário e quadro de horários removidos com sucesso!')
+        messages.success(request, 'Horário e quadro de horários, incluindo preferências associadas, foram removidos com sucesso!')
         return redirect('horarios_adicionar')
+
+    messages.warning(request, 'Ao excluir este horário, todas as preferências associadas também serão excluídas.')
+    return render(request, 'horarios/confirmar_exclusao.html', {'horario': horario})
 
