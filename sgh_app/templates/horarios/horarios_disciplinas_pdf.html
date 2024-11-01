@@ -7,19 +7,41 @@
     <style>
         @page {
             size: A4 landscape;
-            margin: 20mm;
+            margin: 10mm; /* Reduzindo margem para caber melhor em uma única página */
+        }
+        body {
+            font-size: 0.85em; /* Fonte um pouco maior */
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.85em; /* Diminuindo a fonte da tabela */
         }
         th, td {
             border: 1px solid black;
-            padding: 8px;
-            text-align: left;
+            padding: 2px; /* Diminuindo o padding para caber mais conteúdo */
+            text-align: center;
+            vertical-align: middle; /* Alinhamento vertical para centralizar conteúdo */
+        }
+        th.periodo, td.periodo {
+            width: 4%; /* Definindo uma largura menor para a coluna de período */
+            min-width: 50px; /* Definindo uma largura mínima */
+        }
+        th.horario {
+            width: 12%; /* Definindo uma largura maior para a coluna de horários */
         }
         h2 {
             text-align: center;
+            font-size: 1.2em; /* Fonte maior para o título */
+        }
+        .disciplina {
+            font-weight: bold;
+            font-size: 0.9em; /* Aumentando o tamanho da fonte da disciplina */
+            color: #000000;
+        }
+        .professores {
+            font-size: 0.9em; /* Aumentando a fonte dos professores */
+            color: #333; /* Definindo uma cor escura para os professores */
         }
     </style>
 </head>
@@ -36,8 +58,8 @@
     <table>
         <thead>
             <tr>
-                <th>Período</th>
-                <th>Horário(s)</th>
+                <th class="periodo">Período</th>
+                <th class="horario">Horário(s)</th>
                 {% for dia in dias_semana %}
                     <th>{{ dia.nome }}</th>
                 {% endfor %}
@@ -48,27 +70,27 @@
             {% regroup horarios|dictsort:"periodo" by periodo as periodos_grouped %}
             {% for periodo in periodos_grouped %}
                 <tr>
-                    <td rowspan="{{ periodo.list|length }}">{{ periodo.grouper }}</td>
+                    <td class="periodo" rowspan="{{ periodo.list|length }}">{{ periodo.grouper }}</td>
                     
                     {% for horario in periodo.list %}
-                    <td>{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
+                    <td class="horario">{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
 
                     {% for dia in dias_semana %}
-                        <td>
+                        <td style="background-color: {{ horario.cor_disciplina }};">
                             {% if dia in horario.horario_curso.dias_semana.all %}
                                 {% if horario.alocacoes_list %}
                                     {% for alocacao in horario.alocacoes_list %}
                                         {% if alocacao.dia_semana == dia and alocacao.periodo == horario.periodo %}
-                                            <strong>{{ alocacao.disciplina.nome }}</strong><br>
-                                            
-                                            {% if alocacao.disciplina.disciplina_professores.exists %}
-                                                <em>Professores:</em>
-                                                <ul>
-                                                    {% for prof in alocacao.disciplina.disciplina_professores.all %}
-                                                        <li>{{ prof.professor.nome }}</li>
-                                                    {% endfor %}
-                                                </ul>
-                                            {% endif %}
+                                            <div class="disciplina">
+                                                {{ alocacao.disciplina.nome }}
+                                                {% if alocacao.disciplina.disciplina_professores.exists %}
+                                                    : <span class="professores">
+                                                        {% for prof in alocacao.disciplina.disciplina_professores.all %}
+                                                            {{ prof.professor.nome }}{% if not forloop.last %}, {% endif %}
+                                                        {% endfor %}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
                                         {% endif %}
                                     {% endfor %}
                                 {% else %}

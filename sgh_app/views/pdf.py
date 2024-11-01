@@ -23,14 +23,13 @@ def gerar_pdf(request):
     dias_semana = DiasSemana.objects.all()
     pesquisa_realizada = False
 
-    # Obter os horários com a relação para os dias da semana, filtrando pelo curso atual
-    horarios = HorariosDisciplinas.objects.filter(
-        horario_curso__curso=curso
-    ).select_related(
-        'disciplina',
-        'ano_semestre',
-        'horario_curso'
-    ).prefetch_related('horario_curso__dias_semana')
+    # Obter e ordenar os horários pelo período e horário de início
+    horarios = (
+        HorariosDisciplinas.objects.filter(horario_curso__curso=curso)
+        .select_related('disciplina', 'ano_semestre', 'horario_curso')
+        .prefetch_related('horario_curso__dias_semana')
+        .order_by("periodo", "horario_curso__hora_inicio")  # Ordenação aplicada
+    )
 
     if ano and semestre_id:
         # Filtrar também por ano e semestre fornecidos pelo usuário
@@ -60,6 +59,7 @@ def gerar_pdf(request):
                 horarios_vistos.add(chave_horario)
                 horarios_unicos.append(horario)
 
+                # Adiciona a lista de alocações para o horário
                 alocacoes = HorariosDisciplinas.objects.filter(
                     horario_curso=horario.horario_curso,
                     ano_semestre=horario.ano_semestre
