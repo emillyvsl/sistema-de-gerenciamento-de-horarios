@@ -29,8 +29,14 @@
             <a href="{% url 'gerar_pdf' %}?ano={{ request.GET.ano }}&semestre={{ request.GET.semestre }}" class="btn btn-primary mr-2">Baixar Horários em PDF</a>
             {% if horarios %}
                 {% with horario=horarios.0 %}
-                    <a href="{% url 'excluir_quadro_horarios' horario.ano_semestre.id %}" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir este quadro de horários? Esta ação é irreversível.')">
-                        Excluir Quadro de Horários
+                    <!-- Ícone de exclusão com tooltip -->
+                    <a href="{% url 'excluir_quadro_horarios' horario.ano_semestre.id %}" 
+                       class="btn btn-danger mr-2" 
+                       onclick="return confirm('Tem certeza que deseja excluir este quadro de horários? Esta ação é irreversível.')"
+                       data-toggle="tooltip" 
+                       data-placement="top" 
+                       title="Excluir Quadro de Horários">
+                        <i class="fa fa-trash"></i>
                     </a>
                 {% endwith %}
             {% endif %}
