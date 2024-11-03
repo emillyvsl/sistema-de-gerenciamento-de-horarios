@@ -13,7 +13,6 @@
             <h5 class="card-title">Centro</h5>
             <p class="card-text">{{ professor.centro.nome }}</p>
 
-
             <h5 class="card-title">Disciplinas Atribuídas</h5>
             <ul class="list-group">
                 {% for disciplina_professor in disciplinas %}
@@ -29,7 +28,6 @@
                 <li class="list-group-item">Nenhuma disciplina atribuída.</li>
                 {% endfor %}
             </ul>
-
 
             <!-- Preferências de Horário -->
             <h5 class="card-title mt-4">Preferências de Horário</h5>
@@ -60,15 +58,12 @@
                 <li class="list-group-item">Nenhuma preferência registrada.</li>
                 {% endfor %}
             </ul>
-
-            
-
         </div>
         <div class="card-footer">
             <a href="{% url 'listar_professores' %}" class="btn btn-secondary">Voltar</a>
 
-            <!-- Botão para abrir o modal de adicionar preferências -->
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addPreferenciaModal">
+            <!-- Botão de adicionar preferência com verificação de horários -->
+            <button type="button" class="btn btn-primary" onclick="checkHorariosDisponiveis({{ horarios_disponiveis|yesno:'true,false' }})">
                 Adicionar Preferência
             </button>
         </div>
@@ -112,5 +107,18 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Função para verificar a disponibilidade de horários e mostrar mensagem ou abrir o modal
+    function checkHorariosDisponiveis(horariosDisponiveis) {
+        if (horariosDisponiveis) {
+            // Se houver horários disponíveis, abre o modal
+            $('#addPreferenciaModal').modal('show');
+        } else {
+            // Se não houver horários, mostra uma mensagem de alerta
+            alert("Este curso ainda não possui horários disponíveis para serem escolhidos.");
+        }
+    }
+</script>
 
 {% endblock %}

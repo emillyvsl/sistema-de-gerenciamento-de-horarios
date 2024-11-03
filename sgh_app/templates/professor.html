@@ -3,12 +3,12 @@
 {% load static %}
 {% block title %}Listagem de Professores{% endblock %}
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-5 mb-5 px-4">
     <h2 class="mb-4">Professores do curso de {{ curso.nome }}</h2>
 
     <!-- Botão para abrir o modal de cadastro -->
     <div class="text-right mb-4">
-        <button class="btn btn-primary mb-4" data-toggle="modal" data-target="#cadastroModal">Cadastrar Professor</button>
+        <button class="btn btn-primary mb-4" data-toggle="modal" data-target="#cadastroModal"><i class="fas fa-user-plus"></i> Cadastrar</button>
     </div>
 
     <!-- Tabela de professores -->
