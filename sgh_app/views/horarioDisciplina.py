@@ -94,6 +94,7 @@ def horarioDisciplina(request):
         "dias_semana": dias_semana,
         "colspan_value": colspan_value,
         "preferencias_professores": preferencias_professores,
+        "curso": curso,
     }
 
     return render(request, "horarios/horarios_disciplinas.html", context)

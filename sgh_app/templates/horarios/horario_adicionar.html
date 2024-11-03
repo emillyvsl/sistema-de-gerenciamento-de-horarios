@@ -29,19 +29,20 @@
               {% endfor %}
             </td>
             <td>
-              <button class="btn btn-warning btn-sm" 
+              <button class="btn btn-primary btn-sm"
                       data-horario-id="{{ horario.id }}" 
                       data-hora-inicio="{{ horario.hora_inicio }}" 
                       data-hora-fim="{{ horario.hora_fim }}" 
                       data-dias-semana="{{ horario.dias_semana_json }}" 
                       onclick="abrirModalEditar(this)">
+                      <i class="fas fa-pencil-alt"></i>
                 Editar
               </button>
 
               <!-- Formulário para excluir horário com confirmação -->
               <form action="{% url 'horarios_excluir' horario.id %}" method="POST" style="display:inline;" onsubmit="return confirmarExclusao();">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> Excluir</button>
               </form>
             </td>
           </tr>
