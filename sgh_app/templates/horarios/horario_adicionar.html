@@ -2,159 +2,198 @@
 {% load static %}
 
 {% block title %}
-  Horários do Curso
+Horários do Curso
 {% endblock %}
 
 {% block content %}
-  <div class="container margin-top">
-    <div class="text-right mb-4">
-      <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#modalAdicionarHorario">Adicionar Horário</a>
-    </div>
-
-    <table class="table table-borderless">
-      <thead>
-        <tr>
-          <th scope="col">Horário</th>
-          <th scope="col">Dias da Semana</th>
-          <th scope="col">Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for horario in horarios_curso %}
-          <tr>
-            <td>{{ horario.hora_inicio }} a {{ horario.hora_fim }}</td>
-            <td>
-              {% for dia in horario.dias_semana.all %}
-                {{ dia.nome }}{% if not forloop.last %}, {% endif %}
-              {% endfor %}
-            </td>
-            <td>
-              <button class="btn btn-primary btn-sm"
-                      data-horario-id="{{ horario.id }}" 
-                      data-hora-inicio="{{ horario.hora_inicio }}" 
-                      data-hora-fim="{{ horario.hora_fim }}" 
-                      data-dias-semana="{{ horario.dias_semana_json }}" 
-                      onclick="abrirModalEditar(this)">
-                      <i class="fas fa-pencil-alt"></i>
-                Editar
-              </button>
-
-              <!-- Formulário para excluir horário com confirmação -->
-              <form action="{% url 'horarios_excluir' horario.id %}" method="POST" style="display:inline;" onsubmit="return confirmarExclusao();">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> Excluir</button>
-              </form>
-            </td>
-          </tr>
-        {% endfor %}
-        {% if horarios_curso.count == 0 %}
-          <tr>
-            <td colspan="3" class="text-center">Nenhum horário cadastrado.</td>
-          </tr>
-        {% endif %}
-      </tbody>
-    </table>
+<div class="container margin-top">
+  <div class="text-right mb-4">
+    <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#modalAdicionarHorario">Adicionar Horário</a>
   </div>
 
-  <!-- Modal para adicionar horário -->
-  <div class="modal fade" id="modalAdicionarHorario" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalLabel">Adicionar Horário</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  <table class="table table-borderless">
+    <thead>
+      <tr>
+        <th scope="col">Horário</th>
+        <th scope="col">Dias da Semana</th>
+        <th scope="col">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for horario in horarios_curso %}
+      <tr>
+        <td>{{ horario.hora_inicio }} a {{ horario.hora_fim }}</td>
+        <td>
+          {% for dia in horario.dias_semana.all %}
+          {{ dia.nome }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        </td>
+        <td>
+          <button class="btn btn-primary btn-sm" data-horario-id="{{ horario.id }}"
+            data-hora-inicio="{{ horario.hora_inicio }}" data-hora-fim="{{ horario.hora_fim }}"
+            data-dias-semana="{{ horario.dias_semana_json }}" onclick="abrirModalEditar(this)">
+            <i class="fas fa-pencil-alt"></i>
+            Editar
+          </button>
+
+          <!-- Botão para abrir modal de confirmação de exclusão -->
+          <button type="button" class="btn btn-danger btn-sm" onclick="abrirModalExcluir({{ horario.id }})">
+            <i class="fas fa-trash-alt"></i> Excluir
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+      {% if horarios_curso.count == 0 %}
+      <tr>
+        <td colspan="3" class="text-center">Nenhum horário cadastrado.</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal para adicionar horário -->
+<div class="modal fade" id="modalAdicionarHorario" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalLabel">Adicionar Horário</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+            aria-hidden="true">&times;</span></button>
+      </div>
+      <form method="POST" action="{% url 'horarios_adicionar' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <!-- Checkboxes para os dias da semana -->
+          <div class="form-group">
+            <label for="dias_semana">Dias da Semana</label><br>
+            {% for dia in dias %}
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" id="dia{{ dia.id }}" name="dias_semana"
+                value="{{ dia.id }}">
+              <label class="form-check-label" for="dia{{ dia.id }}">{{ dia.nome }}</label>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="form-group">
+            <label for="hora_inicio">Hora de Início</label>
+            <input type="time" class="form-control" id="hora_inicio" name="hora_inicio" required />
+          </div>
+          <div class="form-group">
+            <label for="hora_fim">Hora de Fim</label>
+            <input type="time" class="form-control" id="hora_fim" name="hora_fim" required />
+          </div>
         </div>
-        <form method="POST" action="{% url 'horarios_adicionar' %}">
-          {% csrf_token %}
-          <div class="modal-body">
-            <!-- Checkboxes para os dias da semana -->
-            <div class="form-group">
-              <label for="dias_semana">Dias da Semana</label><br>
-              {% for dia in dias %}
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="checkbox" id="dia{{ dia.id }}" name="dias_semana" value="{{ dia.id }}">
-                  <label class="form-check-label" for="dia{{ dia.id }}">{{ dia.nome }}</label>
-                </div>
-              {% endfor %}
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para editar horário -->
+<div class="modal fade" id="modalEditarHorario" tabindex="-1" role="dialog" aria-labelledby="modalEditarLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalEditarLabel">Editar Horário</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+            aria-hidden="true">&times;</span></button>
+      </div>
+      <form method="POST" id="formEditarHorario">
+        {% csrf_token %}
+        <div class="modal-body">
+          <!-- Checkboxes para os dias da semana -->
+          <div class="form-group">
+            <label for="editarDiasSemana">Dias da Semana</label><br>
+            {% for dia in dias %}
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" id="editarDia{{ dia.id }}" name="dias_semana"
+                value="{{ dia.id }}">
+              <label class="form-check-label" for="editarDia{{ dia.id }}">{{ dia.nome }}</label>
             </div>
-            <div class="form-group">
-              <label for="hora_inicio">Hora de Início</label>
-              <input type="time" class="form-control" id="hora_inicio" name="hora_inicio" required />
-            </div>
-            <div class="form-group">
-              <label for="hora_fim">Hora de Fim</label>
-              <input type="time" class="form-control" id="hora_fim" name="hora_fim" required />
-            </div>
+            {% endfor %}
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Salvar</button>
+          <div class="form-group">
+            <label for="editarHoraInicio">Hora de Início</label>
+            <input type="time" class="form-control" id="editarHoraInicio" name="hora_inicio" required />
           </div>
-        </form>
+          <div class="form-group">
+            <label for="editarHoraFim">Hora de Fim</label>
+            <input type="time" class="form-control" id="editarHoraFim" name="hora_fim" required />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmação de exclusão -->
+<div class="modal fade" id="modalExcluirHorario" tabindex="-1" role="dialog" aria-labelledby="modalExcluirLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalExcluirLabel">Confirmar Exclusão</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+            aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <p>Tem certeza de que deseja excluir este horário? Esta ação não pode ser desfeita.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmarExcluir">Excluir</button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Modal para editar horário -->
-  <div class="modal fade" id="modalEditarHorario" tabindex="-1" role="dialog" aria-labelledby="modalEditarLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalEditarLabel">Editar Horário</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        </div>
-        <form method="POST" id="formEditarHorario">
-          {% csrf_token %}
-          <div class="modal-body">
-            <input type="hidden" id="editarHorarioId" name="horario_id" />
-            <div class="form-group">
-              <label for="editarDiasSemana">Dias da Semana</label>
-              <select class="form-control" id="editarDiasSemana" name="dias_semana" multiple>
-                {% for dia in dias %}
-                  <option value="{{ dia.id }}">{{ dia.nome }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="editarHoraInicio">Hora de Início</label>
-              <input type="time" class="form-control" id="editarHoraInicio" name="hora_inicio" required />
-            </div>
-            <div class="form-group">
-              <label for="editarHoraFim">Hora de Fim</label>
-              <input type="time" class="form-control" id="editarHoraFim" name="hora_fim" required />
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Salvar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+<script>
+  function abrirModalEditar(button) {
+    var horarioId = button.getAttribute('data-horario-id');
+    var horaInicio = button.getAttribute('data-hora-inicio');
+    var horaFim = button.getAttribute('data-hora-fim');
+    var diasSemana = JSON.parse(button.getAttribute('data-dias-semana'));
 
-  <script>
-    function abrirModalEditar(button) {
-      var horarioId = button.getAttribute('data-horario-id');
-      var horaInicio = button.getAttribute('data-hora-inicio');
-      var horaFim = button.getAttribute('data-hora-fim');
-      var diasSemana = JSON.parse(button.getAttribute('data-dias-semana'));
+    // Preenche os campos de hora início e fim
+    document.getElementById('editarHoraInicio').value = horaInicio;
+    document.getElementById('editarHoraFim').value = horaFim;
 
-      document.getElementById('editarHorarioId').value = horarioId;
-      document.getElementById('editarHoraInicio').value = horaInicio;
-      document.getElementById('editarHoraFim').value = horaFim;
+    // Define o ID do horário para o formulário de edição
+    document.getElementById('formEditarHorario').action = '/horarios/editar/' + horarioId + '/';
 
-      const diasSemanaSelect = document.getElementById('editarDiasSemana');
-      for (let option of diasSemanaSelect.options) {
-          option.selected = diasSemana.includes(parseInt(option.value));
-      }
+    // Marca os checkboxes dos dias da semana correspondentes
+    document.querySelectorAll('#modalEditarHorario input[name="dias_semana"]').forEach(checkbox => {
+      checkbox.checked = diasSemana.includes(parseInt(checkbox.value));
+    });
 
-      document.getElementById('formEditarHorario').action = '/horarios/editar/' + horarioId + '/';
-      $('#modalEditarHorario').modal('show');
-    }
+    // Abre o modal de edição
+    $('#modalEditarHorario').modal('show');
+  }
 
-    function confirmarExclusao() {
-      return confirm("Tem certeza de que deseja remover este horário? Todas as preferências associadas também serão excluídas.");
-    }
-  </script>
+  function abrirModalExcluir(horarioId) {
+    document.getElementById('confirmarExcluir').onclick = function () {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `/horarios/excluir/${horarioId}/`;
+      const csrfToken = document.createElement('input');
+      csrfToken.type = 'hidden';
+      csrfToken.name = 'csrfmiddlewaretoken';
+      csrfToken.value = '{{ csrf_token }}';
+      form.appendChild(csrfToken);
+      document.body.appendChild(form);
+      form.submit();
+    };
+    $('#modalExcluirHorario').modal('show');
+  }
+</script>
 {% endblock %}
