@@ -68,8 +68,8 @@
         <div class="card-footer">
             <a href="{% url 'listar_professores' %}" class="btn btn-secondary">Voltar</a>
 
-            <!-- Botão para abrir o modal de adicionar preferências -->
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addPreferenciaModal">
+            <!-- Botão de adicionar preferência com verificação de horários -->
+            <button type="button" class="btn btn-primary" onclick="checkHorariosDisponiveis({{ horarios_disponiveis|yesno:'true,false' }})">
                 Adicionar Preferência
             </button>
         </div>
@@ -117,63 +117,16 @@
     </div>
 </div>
 
-<!-- Modal de Confirmação de Exclusão -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Você tem certeza de que deseja excluir este item?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteButton">Confirmar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- JavaScript para enviar o formulário via Ajax e recarregar a página -->
 <script>
-    function adicionarPreferencia() {
-        const form = document.getElementById('formAddPreferencia');
-        const formData = new FormData(form);
-
-        fetch(form.action, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-            },
-            body: formData
-        })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Erro ao adicionar a preferência.');
-                }
-            })
-            .then(data => {
-                if (data.success) {
-                    $('#addPreferenciaModal').modal('hide');
-                    location.reload();
-                }
-            })
-            .catch(error => console.error(error));
-    }
-
-    function confirmDelete(formId) {
-        const confirmButton = document.getElementById('confirmDeleteButton');
-        confirmButton.onclick = function () {
-            document.getElementById(formId).submit();
-        };
-        $('#confirmDeleteModal').modal('show');
+    // Função para verificar a disponibilidade de horários e mostrar mensagem ou abrir o modal
+    function checkHorariosDisponiveis(horariosDisponiveis) {
+        if (horariosDisponiveis) {
+            // Se houver horários disponíveis, abre o modal
+            $('#addPreferenciaModal').modal('show');
+        } else {
+            // Se não houver horários, mostra uma mensagem de alerta
+            alert("Este curso ainda não possui horários disponíveis para serem escolhidos.");
+        }
     }
 </script>
 
