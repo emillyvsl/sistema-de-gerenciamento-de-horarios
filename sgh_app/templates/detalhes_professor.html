@@ -2,6 +2,7 @@
 {% load static %}
 {% block title %}Detalhes do Professor{% endblock %}
 {% block content %}
+
 <div class="container mt-5">
     <h2 class="mb-4">Detalhes do Professor(a) {{ professor.nome }}</h2>
 
@@ -19,11 +20,9 @@
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     {{ disciplina_professor.disciplina.nome }}
                     <!-- Botão para remover a disciplina com confirmação -->
-                    <form id="formRemoverDisciplina{{ disciplina_professor.id }}" method="POST"
-                        action="{% url 'remover_disciplina_professor' disciplina_professor.id %}" style="margin: 0;">
+                    <form id="formRemoverDisciplina{{ disciplina_professor.id }}" method="POST" action="{% url 'remover_disciplina_professor' disciplina_professor.id %}" style="margin: 0;">
                         {% csrf_token %}
-                        <button type="button" class="btn btn-danger btn-sm"
-                            onclick="confirmDelete('formRemoverDisciplina{{ disciplina_professor.id }}')">Remover</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('formRemoverDisciplina{{ disciplina_professor.id }}')">Remover</button>
                     </form>
                 </li>
                 {% empty %}
@@ -42,22 +41,18 @@
                             <li>
                                 <strong>Dias:</strong>
                                 {% for dia in preferencia.dias_preferidos.all %}
-                                {{ dia.nome }}{% if not forloop.last %}, {% endif %}
+                                    {{ dia.nome }}{% if not forloop.last %}, {% endif %}
                                 {% endfor %}
                                 <br>
-                                <strong>Hora:</strong> {{ horario.hora_inicio|time:"H:i" }} a {{
-                                horario.hora_fim|time:"H:i" }}
+                                <strong>Hora:</strong> {{ horario.hora_inicio|time:"H:i" }} a {{ horario.hora_fim|time:"H:i" }}
                             </li>
                             {% endfor %}
                         </ul>
                     </div>
                     <!-- Botão para remover a preferência com confirmação -->
-                    <form id="formRemoverPreferencia{{ preferencia.id }}" method="POST"
-                        action="{% url 'remover_preferencia_professor' preferencia.id professor.id %}"
-                        style="margin: 0;">
+                    <form id="formRemoverPreferencia{{ preferencia.id }}" method="POST" action="{% url 'remover_preferencia_professor' preferencia.id professor.id %}" style="margin: 0;">
                         {% csrf_token %}
-                        <button type="button" class="btn btn-danger btn-sm"
-                            onclick="confirmDelete('formRemoverPreferencia{{ preferencia.id }}')">Remover</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('formRemoverPreferencia{{ preferencia.id }}')">Remover</button>
                     </form>
                 </li>
                 {% empty %}
@@ -68,8 +63,8 @@
         <div class="card-footer">
             <a href="{% url 'listar_professores' %}" class="btn btn-secondary">Voltar</a>
 
-            <!-- Botão de adicionar preferência com verificação de horários -->
-            <button type="button" class="btn btn-primary" onclick="checkHorariosDisponiveis({{ horarios_disponiveis|yesno:'true,false' }})">
+            <!-- Botão para abrir o modal de adicionar preferências -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addPreferenciaModal">
                 Adicionar Preferência
             </button>
         </div>
@@ -77,12 +72,10 @@
 </div>
 
 <!-- Modal para adicionar preferências -->
-<div class="modal fade" id="addPreferenciaModal" tabindex="-1" role="dialog" aria-labelledby="addPreferenciaLabel"
-    aria-hidden="true">
+<div class="modal fade" id="addPreferenciaModal" tabindex="-1" role="dialog" aria-labelledby="addPreferenciaLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form method="POST" action="{% url 'adicionar_preferencia_professor' professor.id %}"
-                id="formAddPreferencia">
+            <form method="POST" action="{% url 'adicionar_preferencia_professor' professor.id %}" id="formAddPreferencia">
                 {% csrf_token %}
                 <div class="modal-header">
                     <h5 class="modal-title" id="addPreferenciaLabel">Adicionar Preferência de Horário</h5>
@@ -101,7 +94,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="dias_preferidos">Dias Relacionados</label>
+                        <label for="dias_preferidos">Dias </label>
                         <div id="dias_relacionados">
                             <!-- Dias relacionados serão carregados aqui via AJAX -->
                         </div>
@@ -109,24 +102,69 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                    <button type="button" class="btn btn-primary" onclick="adicionarPreferencia()">Salvar
-                        Preferência</button>
+                    <button type="button" class="btn btn-primary" onclick="adicionarPreferencia()">Salvar Preferência</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Você tem certeza de que deseja excluir este item?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteButton">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript para enviar o formulário via Ajax e recarregar a página -->
 <script>
-    // Função para verificar a disponibilidade de horários e mostrar mensagem ou abrir o modal
-    function checkHorariosDisponiveis(horariosDisponiveis) {
-        if (horariosDisponiveis) {
-            // Se houver horários disponíveis, abre o modal
-            $('#addPreferenciaModal').modal('show');
-        } else {
-            // Se não houver horários, mostra uma mensagem de alerta
-            alert("Este curso ainda não possui horários disponíveis para serem escolhidos.");
-        }
+    function adicionarPreferencia() {
+        const form = document.getElementById('formAddPreferencia');
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            },
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Erro ao adicionar a preferência.');
+            }
+        })
+        .then(data => {
+            if (data.success) {
+                $('#addPreferenciaModal').modal('hide');
+                location.reload();
+            }
+        })
+        .catch(error => console.error(error));
+    }
+
+    function confirmDelete(formId) {
+        const confirmButton = document.getElementById('confirmDeleteButton');
+        confirmButton.onclick = function() {
+            document.getElementById(formId).submit();
+        };
+        $('#confirmDeleteModal').modal('show');
     }
 </script>
 
