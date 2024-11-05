@@ -38,10 +38,7 @@
                   data-dias-semana="{{ horario.dias_semana_json }}" 
                   onclick="abrirModalEditar(this)">
               Editar
-          </button>
-
-
-    
+              </button>
               <!-- Formulário para excluir horário -->
               <form action="{% url 'horarios_excluir' horario.id %}" method="POST" style="display:inline;">
                 {% csrf_token %}
@@ -50,6 +47,11 @@
             </td>
           </tr>
         {% endfor %}
+        {% if horarios_curso.count == 0 %}
+          <tr>
+            <td colspan="3" class="text-center">Nenhum horário cadastrado.</td>
+          </tr>
+        {% endif %}
       </tbody>
     </table>
   </div>
@@ -65,14 +67,15 @@
         <form method="POST" action="{% url 'horarios_adicionar' %}">
           {% csrf_token %}
           <div class="modal-body">
+            <!-- Checkboxes para os dias da semana -->
             <div class="form-group">
-              <label for="dias_semana">Dias da Semana</label>
-              <select class="form-control" id="dias_semana" name="dias_semana" multiple>
-                {% for dia in dias %}
-                  <option value="{{ dia.id }}">{{ dia.nome }}</option>
-                {% endfor %}
-              </select>
-              <small class="form-text text-muted">Segure Ctrl (ou Cmd no Mac) para selecionar múltiplos dias.</small>
+              <label for="dias_semana">Dias da Semana</label><br>
+              {% for dia in dias %}
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="dia{{ dia.id }}" name="dias_semana" value="{{ dia.id }}">
+                  <label class="form-check-label" for="dia{{ dia.id }}">{{ dia.nome }}</label>
+                </div>
+              {% endfor %}
             </div>
             <div class="form-group">
               <label for="hora_inicio">Hora de Início</label>
@@ -93,72 +96,68 @@
   </div>
 
   <!-- Modal para editar horário -->
-<div class="modal fade" id="modalEditarHorario" tabindex="-1" role="dialog" aria-labelledby="modalEditarLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+  <div class="modal fade" id="modalEditarHorario" tabindex="-1" role="dialog" aria-labelledby="modalEditarLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
       <div class="modal-content">
-          <div class="modal-header">
-              <h5 class="modal-title" id="modalEditarLabel">Editar Horário</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditarLabel">Editar Horário</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <form method="POST" id="formEditarHorario">
+          {% csrf_token %}
+          <div class="modal-body">
+            <input type="hidden" id="editarHorarioId" name="horario_id" />
+            <!-- Checkboxes para os dias da semana -->
+            <div class="form-group">
+              <label for="editarDiasSemana">Dias da Semana</label><br>
+              {% for dia in dias %}
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="editarDia{{ dia.id }}" name="dias_semana" value="{{ dia.id }}">
+                  <label class="form-check-label" for="editarDia{{ dia.id }}">{{ dia.nome }}</label>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="form-group">
+              <label for="editarHoraInicio">Hora de Início</label>
+              <input type="time" class="form-control" id="editarHoraInicio" name="hora_inicio" required />
+            </div>
+            <div class="form-group">
+              <label for="editarHoraFim">Hora de Fim</label>
+              <input type="time" class="form-control" id="editarHoraFim" name="hora_fim" required />
+            </div>
           </div>
-          <form method="POST" id="formEditarHorario">
-              {% csrf_token %}
-              <div class="modal-body">
-                  <input type="hidden" id="editarHorarioId" name="horario_id" />
-                  
-                  <!-- Campo para editar os dias da semana -->
-                  <div class="form-group">
-                      <label for="editarDiasSemana">Dias da Semana</label>
-                      <select class="form-control" id="editarDiasSemana" name="dias_semana" multiple>
-                          {% for dia in dias %}
-                              <option value="{{ dia.id }}">{{ dia.nome }}</option>
-                          {% endfor %}
-                      </select>
-                  </div>
-                  
-                  <div class="form-group">
-                      <label for="editarHoraInicio">Hora de Início</label>
-                      <input type="time" class="form-control" id="editarHoraInicio" name="hora_inicio" required />
-                  </div>
-                  <div class="form-group">
-                      <label for="editarHoraFim">Hora de Fim</label>
-                      <input type="time" class="form-control" id="editarHoraFim" name="hora_fim" required />
-                  </div>
-              </div>
-              <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                  <button type="submit" class="btn btn-primary">Salvar</button>
-              </div>
-          </form>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+          </div>
+        </form>
       </div>
+    </div>
   </div>
-</div>
-
 
   <script>
- function abrirModalEditar(button) {
-    // Pega os dados do botão de edição
-    var horarioId = button.getAttribute('data-horario-id');
-    var horaInicio = button.getAttribute('data-hora-inicio');
-    var horaFim = button.getAttribute('data-hora-fim');
-    var diasSemana = JSON.parse(button.getAttribute('data-dias-semana'));  // Recebe dias da semana como JSON
+    function abrirModalEditar(button) {
+      // Pega os dados do botão de edição
+      var horarioId = button.getAttribute('data-horario-id');
+      var horaInicio = button.getAttribute('data-hora-inicio');
+      var horaFim = button.getAttribute('data-hora-fim');
+      var diasSemana = JSON.parse(button.getAttribute('data-dias-semana'));  // Recebe dias da semana como JSON
 
-    // Preenche o modal com os valores
-    document.getElementById('editarHorarioId').value = horarioId;
-    document.getElementById('editarHoraInicio').value = horaInicio;
-    document.getElementById('editarHoraFim').value = horaFim;
+      // Preenche o modal com os valores
+      document.getElementById('editarHorarioId').value = horarioId;
+      document.getElementById('editarHoraInicio').value = horaInicio;
+      document.getElementById('editarHoraFim').value = horaFim;
 
-    // Seleciona os dias no campo de múltipla seleção
-    const diasSemanaSelect = document.getElementById('editarDiasSemana');
-    for (let option of diasSemanaSelect.options) {
-        option.selected = diasSemana.includes(parseInt(option.value));
+      // Seleciona os checkboxes de dias da semana
+      document.querySelectorAll('#modalEditarHorario .form-check-input').forEach(checkbox => {
+        checkbox.checked = diasSemana.includes(parseInt(checkbox.value));
+      });
+
+      // Define a URL de ação do formulário de edição para garantir que o horário existente seja atualizado
+      document.getElementById('formEditarHorario').action = '/horarios/editar/' + horarioId + '/';
+
+      // Abre o modal usando jQuery para Bootstrap 4
+      $('#modalEditarHorario').modal('show');
     }
-
-    // Define a URL de ação do formulário de edição para garantir que o horário existente seja atualizado
-    document.getElementById('formEditarHorario').action = '/horarios/editar/' + horarioId + '/';
-
-    // Abre o modal usando jQuery para Bootstrap 4
-    $('#modalEditarHorario').modal('show');
-}
-
   </script>
 {% endblock %}
