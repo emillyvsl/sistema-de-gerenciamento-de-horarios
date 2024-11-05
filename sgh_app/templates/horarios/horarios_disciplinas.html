@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 
-{% block content %}-4"
-<div class="mt-5 mb-5 px>
+{% block content %}
+<h2 class="mb-4">Quadro de Horários do Curso de {{ curso.nome }}</h2>
+
+<div class="mt-5 mb-5">
     <!-- Formulário de seleção de ano e semestre -->
     <form method="GET" action="" class="mb-4">
         <div class="row align-items-end">
@@ -9,7 +11,7 @@
                 <label for="ano">Ano:</label>
                 <input type="number" id="ano" name="ano" class="form-control" placeholder="Informe o Ano" value="{{ request.GET.ano }}">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="semestre">Semestre:</label>
                 <select id="semestre" name="semestre" class="form-control">
                     <option value="" disabled selected>Informe o Semestre</option>
@@ -20,26 +22,21 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-4 d-flex justify-content-start">
-                <button type="submit" class="btn btn-primary mt-auto"><i class="fas fa-search"></i> Pesquisar</button>
+            <!-- Botões alinhados ao lado do campo de pesquisa -->
+            <div class="col-md-3 d-flex  mt-2">
+                <button type="submit" class="btn btn-primary mr-2"><i class="fas fa-search"></i> Pesquisar</button>
+                <a href="{% url 'gerar_horarios' %}" class="btn btn-primary mr-2"><i class="fas fa-plus"></i> Gerar Horários</a>
+                <a href="{% url 'gerar_pdf' %}?ano={{ request.GET.ano }}&semestre={{ request.GET.semestre }}" class="btn btn-primary mr-2" title="Baixar Quadro de Horários em PDF"><i class="fas fa-download"></i></a>
+                {% if horarios %}
+                    {% with horario=horarios.0 %}
+                        <a href="{% url 'excluir_quadro_horarios' horario.ano_semestre.id %}" class="btn btn-danger" 
+                           onclick="return confirm('Tem certeza que deseja excluir este quadro de horários? Esta ação é irreversível.')"
+                           title="Excluir Quadro de Horários">
+                            <i class="fa fa-trash"></i>
+                        </a>
+                    {% endwith %}
+                {% endif %}
             </div>
-        </div>
-        <div class="d-flex justify-content-end mt-3">
-            <a href="{% url 'gerar_horarios' %}" class="btn btn-primary mr-2"> <i class="fas fa-plus"></i> Gerar Horários</a>
-            <a href="{% url 'gerar_pdf' %}?ano={{ request.GET.ano }}&semestre={{ request.GET.semestre }}" class="btn btn-primary mr-2" title="Baixar Quadro de Horários em pdf"> <i class="fas fa-download"></i></a>
-            {% if horarios %}
-                {% with horario=horarios.0 %}
-                    <!-- Ícone de exclusão com tooltip -->
-                    <a href="{% url 'excluir_quadro_horarios' horario.ano_semestre.id %}" 
-                       class="btn btn-danger mr-2" 
-                       onclick="return confirm('Tem certeza que deseja excluir este quadro de horários? Esta ação é irreversível.')"
-                       data-toggle="tooltip" 
-                       data-placement="top" 
-                       title="Excluir Quadro de Horários">
-                        <i class="fa fa-trash"></i>
-                    </a>
-                {% endwith %}
-            {% endif %}
         </div>
     </form>
 
@@ -73,9 +70,7 @@
                         {% if forloop.first %}
                             <td rowspan="{{ periodo.list|length }}" class="align-middle">{{ periodo.grouper }}</td>
                         {% endif %}
-                        
                         <td>{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
-
                         {% for dia in dias_semana %}
                             <td class="align-middle">
                                 {% if dia in horario.horario_curso.dias_semana.all %}
@@ -88,7 +83,6 @@
                                                         <a href="#" onclick="removerAlocacao({{ alocacao.id }})" title="Remover Alocação">
                                                             <i class="fa fa-trash text-red"></i>
                                                         </a>
-                                                        
                                                         <form id="remover-form-{{ alocacao.id }}" action="{% url 'remover_alocacao' alocacao.id %}" method="POST" style="display: none;">
                                                             {% csrf_token %}
                                                         </form>
@@ -106,24 +100,18 @@
                                                 {% endif %}
                                             {% endif %}
                                         {% endfor %}
-
                                         {% if not alocacao_encontrada %}
                                         <div class="alocacao-actions">
                                             <a href="{% url 'alocar_disciplina' horario.horario_curso.id dia.id periodo.grouper %}" class="btn btn-secondary btn-sm">
                                                 Adicionar Disciplina
                                             </a>
-
-                                           {% for preferencia in preferencias_professores %}
-                                            {% if dia in preferencia.dias_preferidos.all and horario.horario_curso in preferencia.horas_preferidas.all %}
-                                                <span class="badge {% if preferencia.professor.centro != curso.centro %}badge-success{% else %}badge-danger{% endif %}" title="Preferência de {{ preferencia.professor.nome }}">
-                                                    <i class="fa fa-exclamation-circle"></i>
-                                                </span>
-                                            {% endif %}
-                                        {% endfor %}
-
-                            
-
-                                     
+                                            {% for preferencia in preferencias_professores %}
+                                                {% if dia in preferencia.dias_preferidos.all and horario.horario_curso in preferencia.horas_preferidas.all %}
+                                                    <span class="badge {% if preferencia.professor.centro != curso.centro %}badge-success{% else %}badge-danger{% endif %}" title="Preferência de {{ preferencia.professor.nome }}">
+                                                        <i class="fa fa-exclamation-circle"></i>
+                                                    </span>
+                                                {% endif %}
+                                            {% endfor %}
                                         </div>
                                         {% endif %}
                                     {% endwith %}
