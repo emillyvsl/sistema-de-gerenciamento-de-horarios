@@ -7,41 +7,41 @@
     <style>
         @page {
             size: A4 landscape;
-            margin: 10mm; /* Reduzindo margem para caber melhor em uma única página */
+            margin: 10mm;
         }
         body {
-            font-size: 0.85em; /* Fonte um pouco maior */
+            font-size: 0.85em;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85em; /* Diminuindo a fonte da tabela */
+            font-size: 0.85em;
         }
         th, td {
             border: 1px solid black;
-            padding: 2px; /* Diminuindo o padding para caber mais conteúdo */
+            padding: 2px;
             text-align: center;
-            vertical-align: middle; /* Alinhamento vertical para centralizar conteúdo */
+            vertical-align: middle;
         }
         th.periodo, td.periodo {
-            width: 4%; /* Definindo uma largura menor para a coluna de período */
-            min-width: 50px; /* Definindo uma largura mínima */
+            width: 4%;
+            min-width: 50px;
         }
         th.horario {
-            width: 12%; /* Definindo uma largura maior para a coluna de horários */
+            width: 12%;
         }
         h2 {
             text-align: center;
-            font-size: 1.2em; /* Fonte maior para o título */
+            font-size: 1.2em;
         }
         .disciplina {
             font-weight: bold;
-            font-size: 0.9em; /* Aumentando o tamanho da fonte da disciplina */
+            font-size: 0.9em;
             color: #000000;
         }
         .professores {
-            font-size: 0.9em; /* Aumentando a fonte dos professores */
-            color: #333; /* Definindo uma cor escura para os professores */
+            font-size: 0.9em;
+            color: #333;
         }
     </style>
 </head>
@@ -76,12 +76,17 @@
                     <td class="horario">{{ horario.horario_curso.hora_inicio }} - {{ horario.horario_curso.hora_fim }}</td>
 
                     {% for dia in dias_semana %}
-                        <td style="background-color: {{ horario.cor_disciplina }};">
+                        <td style="background-color: 
+                            {% if horario.alocacoes_list %}
+                                {{ horario.alocacoes_list.0.disciplina_cor }}
+                            {% else %}
+                                #FFFFFF
+                            {% endif %};">
                             {% if dia in horario.horario_curso.dias_semana.all %}
                                 {% if horario.alocacoes_list %}
                                     {% for alocacao in horario.alocacoes_list %}
                                         {% if alocacao.dia_semana == dia and alocacao.periodo == horario.periodo %}
-                                            <div class="disciplina">
+                                            <div class="disciplina" style="background-color: {{ alocacao.disciplina_cor }};">
                                                 {{ alocacao.disciplina.nome }}
                                                 {% if alocacao.disciplina.disciplina_professores.exists %}
                                                     : <span class="professores">
@@ -93,8 +98,6 @@
                                             </div>
                                         {% endif %}
                                     {% endfor %}
-                                {% else %}
-                                    <p>Sem disciplinas</p>
                                 {% endif %}
                             {% endif %}
                         </td>

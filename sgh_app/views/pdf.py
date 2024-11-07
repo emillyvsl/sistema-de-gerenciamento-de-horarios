@@ -15,29 +15,23 @@ def gerar_pdf(request):
 
     curso = coordenacao.curso
     semestres = Semestre.objects.all()
-
-    # Capturar os parâmetros 'ano' e 'semestre' da URL, enviados na pesquisa
     ano = request.GET.get('ano')
     semestre_id = request.GET.get('semestre')
-
     dias_semana = DiasSemana.objects.all()
     pesquisa_realizada = False
 
-    # Obter e ordenar os horários pelo período e horário de início
     horarios = (
         HorariosDisciplinas.objects.filter(horario_curso__curso=curso)
         .select_related('disciplina', 'ano_semestre', 'horario_curso')
         .prefetch_related('horario_curso__dias_semana')
-        .order_by("periodo", "horario_curso__hora_inicio")  # Ordenação aplicada
+        .order_by("periodo", "horario_curso__hora_inicio")
     )
 
     if ano and semestre_id:
-        # Filtrar também por ano e semestre fornecidos pelo usuário
         horarios = horarios.filter(ano_semestre__ano=ano, ano_semestre__semestre_id=semestre_id)
         pesquisa_realizada = True
     else:
         try:
-            # Se o ano e semestre não forem fornecidos, buscar o mais recente
             ultimo_ano_semestre = AnoSemestre.objects.filter(curso=curso).latest('ano', 'semestre')
             horarios = horarios.filter(ano_semestre=ultimo_ano_semestre)
         except AnoSemestre.DoesNotExist:
@@ -45,6 +39,7 @@ def gerar_pdf(request):
 
     horarios_unicos = []
     horarios_vistos = set()
+    disciplina_colors = {}
 
     if horarios:
         for horario in horarios:
@@ -59,12 +54,18 @@ def gerar_pdf(request):
                 horarios_vistos.add(chave_horario)
                 horarios_unicos.append(horario)
 
-                # Adiciona a lista de alocações para o horário
                 alocacoes = HorariosDisciplinas.objects.filter(
                     horario_curso=horario.horario_curso,
                     ano_semestre=horario.ano_semestre
                 )
                 horario.alocacoes_list = alocacoes
+
+                for alocacao in alocacoes:
+                    if alocacao.disciplina:
+                        disciplina = alocacao.disciplina.nome
+                        if disciplina not in disciplina_colors:
+                            disciplina_colors[disciplina] = "#{:06x}".format(hash(disciplina) & 0xFFFFFF)
+                        alocacao.disciplina_cor = disciplina_colors[disciplina]
 
     colspan_value = len(dias_semana) + 2
 
