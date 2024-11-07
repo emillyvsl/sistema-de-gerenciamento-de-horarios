@@ -6,7 +6,6 @@
     <button type="button" onclick="history.back()" class="btn btn-secondary">Voltar</button>
 </div>
 
-
 <div class="mt-5 mb-5">
     <!-- Formulário de seleção de ano e semestre -->
     <form method="GET" action="" class="mb-4">
@@ -32,15 +31,14 @@
                 <a href="{% url 'gerar_pdf' %}?ano={{ request.GET.ano }}&semestre={{ request.GET.semestre }}" class="btn btn-primary mr-2" title="Baixar Quadro de Horários em PDF"><i class="fas fa-download"></i></a>
                 {% if horarios %}
                     {% with horario=horarios.0 %}
-                        <a href="{% url 'excluir_quadro_horarios' horario.ano_semestre.id %}" class="btn btn-danger" 
-                           onclick="return confirm('Tem certeza que deseja excluir este quadro de horários? Esta ação é irreversível.')"
+                        <a href="#" class="btn btn-danger" 
+                           data-toggle="modal" data-target="#modalExcluirHorario" 
+                           onclick="setExcluirUrl('{% url 'excluir_quadro_horarios' horario.ano_semestre.id %}')"
                            title="Excluir Quadro de Horários">
                             <i class="fa fa-trash"></i>
                         </a>
                     {% endwith %}
                 {% endif %}
-
-
             </div>
         </div>
     </form>
@@ -84,12 +82,10 @@
                                             {% if alocacao.dia_semana == dia and alocacao.periodo == periodo.grouper and alocacao.disciplina %}
                                                 <div class="d-flex align-items-center disciplina">
                                                     <strong class="mr-2">{{ alocacao.disciplina.nome }}</strong>
-                                                    <a href="#" onclick="removerAlocacao({{ alocacao.id }})" title="Remover Alocação">
-                                                        <i class="fa fa-trash text-red"></i>
+                                                    <a href="#" class="text-red" data-toggle="modal" data-target="#modalExcluirHorario" title="Remover Alocação"
+                                                       onclick="setExcluirUrl('{% url 'remover_alocacao' alocacao.id %}')">
+                                                        <i class="fa fa-trash"></i>
                                                     </a>
-                                                    <form id="remover-form-{{ alocacao.id }}" action="{% url 'remover_alocacao' alocacao.id %}" method="POST" style="display: none;">
-                                                        {% csrf_token %}
-                                                    </form>
                                                 </div>
                                                 {% if alocacao.disciplina.disciplina_professores.all %}
                                                     <small class="text-muted">
@@ -107,14 +103,6 @@
                                                 Adicionar Disciplina
                                             </a>
                                         </div>
-                                        <!-- Preferências do professor -->
-                                        {% for preferencia in preferencias_professores %}
-                                            {% if dia in preferencia.dias_preferidos.all and horario.horario_curso in preferencia.horas_preferidas.all %}
-                                                <span class="badge {% if preferencia.professor.centro != curso.centro %}badge-success{% else %}badge-danger{% endif %}" title="Preferência de {{ preferencia.professor.nome }}">
-                                                    <i class="fa fa-exclamation-circle"></i>
-                                                </span>
-                                            {% endif %}
-                                        {% endfor %}
                                     </div>
                                 {% else %}
                                     <span class="text-muted">Sem Aula</span>
@@ -134,6 +122,28 @@
     </div>
 </div>
 
+<!-- Modal de confirmação de exclusão -->
+<div class="modal fade" id="modalExcluirHorario" tabindex="-1" role="dialog" aria-labelledby="modalExcluirLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalExcluirLabel">Confirmar Exclusão</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <p>Tem certeza de que deseja excluir este horário? Esta ação não pode ser desfeita.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <form id="excluirForm" method="POST" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Excluir</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <style>
     .custom-table thead {
         background-color: #b0c4de;
@@ -143,39 +153,24 @@
     .text-red {
         color: #ff0000;
     }
-    
-    .badge-info i.fa-exclamation-circle {
-        color: white; 
-    }
-    
-    .badge-info {
-        background-color: red; 
-        color: red; 
-    }
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Seleciona todas as células da tabela que têm conteúdo de disciplina
-        const cells = document.querySelectorAll('.cell-content');
+    // Script para ajustar o link de exclusão no modal
+    function setExcluirUrl(url) {
+        document.getElementById('excluirForm').action = url;
+    }
 
+    document.addEventListener('DOMContentLoaded', function () {
+        // Remove o botão "Adicionar Disciplina" se houver uma disciplina alocada
+        const cells = document.querySelectorAll('.cell-content');
         cells.forEach(cell => {
-            // Verifica se há uma disciplina alocada (elemento com a classe 'disciplina')
             const disciplinaAlocada = cell.querySelector('.disciplina');
             const addButton = cell.querySelector('.add-disciplina-btn');
-
-            // Se houver uma disciplina alocada, remove apenas o botão de adicionar
             if (disciplinaAlocada && addButton) {
                 addButton.remove();
             }
         });
     });
-
-    function removerAlocacao(id) {
-        event.preventDefault();
-        if (confirm("Tem certeza de que deseja remover esta alocação?")) {
-            document.getElementById(`remover-form-${id}`).submit();
-        }
-    }
 </script>
 {% endblock %}
