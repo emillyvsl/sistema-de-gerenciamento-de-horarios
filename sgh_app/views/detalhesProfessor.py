@@ -9,7 +9,7 @@ def detalhes_professor(request, professor_id):
     professor = get_object_or_404(Professor, id=professor_id)
     disciplinas = professor.disciplina_professores.all().select_related('disciplina')
     dias_semana = DiasSemana.objects.all()
-    horarios_curso = HorarioCurso.objects.filter(curso=professor.curso)
+    horarios_curso = HorarioCurso.objects.filter(curso=professor.curso, is_ativo=True)
     preferencias = professor.preferencias.all()  
 
     # Verifique se há horários disponíveis
