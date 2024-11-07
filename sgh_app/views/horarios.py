@@ -199,8 +199,13 @@ def horarios_excluir(request, horario_id):
         try:
             ultimo_ano_semestre = AnoSemestre.objects.filter(curso=horario.curso).latest("ano", "semestre")
             HorariosDisciplinas.objects.filter(horario_curso=horario, ano_semestre=ultimo_ano_semestre).delete()
-            Preferencias.objects.filter(horas_preferidas=horario).delete()
-            messages.success(request, "Horário marcado como inativo e removido do quadro de horários mais recente com sucesso!")
+            
+            # Excluir todas as Preferencias que têm o horario associado em horas_preferidas
+            preferencias_associadas = Preferencias.objects.filter(horas_preferidas=horario)
+            for preferencia in preferencias_associadas:
+                preferencia.delete()
+            
+            messages.success(request, "Horário marcado como inativo, removido do quadro de horários mais recente e preferências associadas excluídas com sucesso!")
         except AnoSemestre.DoesNotExist:
             messages.warning(request, "Nenhum quadro de horários recente foi encontrado para remover o horário.")
 
@@ -208,3 +213,4 @@ def horarios_excluir(request, horario_id):
 
     messages.warning(request, "Ao inativar este horário, ele não estará mais disponível.")
     return render(request, "horarios/confirmar_exclusao.html", {"horario": horario})
+
