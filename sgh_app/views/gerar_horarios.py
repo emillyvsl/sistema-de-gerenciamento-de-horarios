@@ -86,7 +86,72 @@ def gerar_horarios(request):
         'semestres': semestres,
         'periodo_opcoes': periodo_opcoes,
     })
+@login_required
+def gerar_horarios(request):
+    semestres = Semestre.objects.all()
+    periodo_opcoes = []
 
+    coordenacao = request.user.coordenacao
+    if not coordenacao:
+        messages.error(request, "Acesso negado: você não possui coordenação associada.")
+        return redirect('horarios_disciplinas')
+
+    curso = coordenacao.curso
+
+    # Verificar se existem horários ativos para o curso antes de renderizar a página
+    horarios_curso = HorarioCurso.objects.filter(curso=curso, is_ativo=True)
+    if not horarios_curso.exists():
+        messages.error(request, "Não existem horários ativos cadastrados para o seu curso. Cadastre horários primeiro.")
+        return redirect('horarios_disciplinas')  # Redirecione para a página inicial ou outra página apropriada
+
+    if request.method == 'POST':
+        ano = request.POST['ano']
+        semestre_id = request.POST['semestre']
+        paridade = request.POST['paridade']
+
+        if AnoSemestre.objects.filter(ano=ano, semestre_id=semestre_id, curso=curso).exists():
+            messages.warning(request, "Esse ano já foi cadastrado neste semestre para o seu curso.")
+            return redirect('gerar_horarios')
+
+        semestre = Semestre.objects.get(id=semestre_id)
+        ano_semestre = AnoSemestre.objects.create(ano=ano, semestre=semestre, curso=curso)
+
+        if hasattr(curso, 'quantidade_periodos'):
+            for p in range(1, curso.quantidade_periodos + 1):
+                if (paridade == 'par' and p % 2 == 0) or (paridade == 'impar' and p % 2 != 0):
+                    periodo_opcoes.append(p)
+
+        dias_semana = DiasSemana.objects.all()
+
+        for horario_curso in horarios_curso:
+            for periodo in periodo_opcoes:
+                for dia in dias_semana:
+                    if not HorariosDisciplinas.objects.filter(
+                        horario_curso=horario_curso,
+                        dia_semana=dia,
+                        periodo=periodo,
+                        ano_semestre=ano_semestre,
+                        curso=curso
+                    ).exists():
+                        if horario_curso.dias_semana.filter(id=dia.id).exists():
+                            HorariosDisciplinas.objects.create(
+                                horario_curso=horario_curso,
+                                ano_semestre=ano_semestre,
+                                periodo=periodo,
+                                dia_semana=dia,
+                                curso=curso
+                            )
+                            print(f"Horário criado: {horario_curso}, Dia: {dia.nome}, Período: {periodo}")
+                        else:
+                            print(f"Horário ignorado: {horario_curso}, Dia: {dia.nome} não é válido.")
+
+        messages.success(request, 'Ano e semestre cadastrados com sucesso!')
+        return redirect('horarios_disciplinas')
+
+    return render(request, 'horarios/gerar_horarios.html', {
+        'semestres': semestres,
+        'periodo_opcoes': periodo_opcoes,
+    })
 
 @login_required
 def quadro_horarios(request, ano_semestre_id):
