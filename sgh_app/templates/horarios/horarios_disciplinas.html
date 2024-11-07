@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2 class="mb-4">Quadro de Horários do Curso de {{ curso.nome }}</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Quadro de Horários do Curso de {{ curso.nome }}</h2>
+    <button type="button" onclick="history.back()" class="btn btn-secondary">Voltar</button>
+</div>
+
 
 <div class="mt-5 mb-5">
     <!-- Formulário de seleção de ano e semestre -->
@@ -35,6 +39,8 @@
                         </a>
                     {% endwith %}
                 {% endif %}
+
+
             </div>
         </div>
     </form>

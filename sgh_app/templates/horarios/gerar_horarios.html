@@ -29,7 +29,10 @@
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block mt-3">Gerar quadro de horários</button>
+            <div class="d-flex justify-content-between mt-3">
+                <button type="submit" class="btn btn-success">Gerar quadro de horários</button>
+                <button type="button" onclick="history.back()" class="btn btn-secondary">Cancelar</button>
+            </div>
         </form>
 
         {% if periodo_opcoes %}
