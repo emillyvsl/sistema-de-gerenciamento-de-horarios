@@ -30,27 +30,22 @@ def horarios_adicionar(request):
         hora_inicio = time.fromisoformat(request.POST['hora_inicio'])
         hora_fim = time.fromisoformat(request.POST['hora_fim'])
 
-        # Verificação: deve haver pelo menos um dia selecionado
         if not dias_ids:
             messages.error(request, "Erro ao adicionar horário, selecione pelo menos um dia da semana.")
             return redirect('horarios_adicionar')
 
-        # Verificação: horário de fim não pode ser anterior ao horário de início
         if hora_fim <= hora_inicio:
             messages.error(request, "Erro ao adicionar horário, o horário de fim deve ser posterior ao horário de início.")
             return redirect('horarios_adicionar')
 
-        # Obtenha os dias selecionados
         dias = DiasSemana.objects.filter(id__in=dias_ids)
 
-        # Verificar sobreposição de horário
         for dia in dias:
             horarios_existentes = HorarioCurso.objects.filter(
                 curso=curso,
                 dias_semana=dia
             )
             for horario in horarios_existentes:
-                # Checar se o novo horário sobrepõe algum horário existente
                 if (hora_inicio < horario.hora_fim and hora_fim > horario.hora_inicio):
                     messages.error(
                         request,
@@ -58,24 +53,57 @@ def horarios_adicionar(request):
                     )
                     return redirect('horarios_adicionar')
 
-        # Crie um único horário para todos os dias selecionados
+        # Criação do novo horário do curso
         novo_horario = HorarioCurso.objects.create(
             curso=curso,
             hora_inicio=hora_inicio,
             hora_fim=hora_fim
         )
-
-        # Associe os dias selecionados ao novo horário
-        novo_horario.dias_semana.set(dias)  # Associa todos os dias de uma vez
+        novo_horario.dias_semana.set(dias)
         novo_horario.save()
 
-        messages.success(request, 'Horários e quadro de horários adicionados com sucesso!')
+        # Verificar e adicionar o novo horário ao AnoSemestre mais recente
+        try:
+            ultimo_ano_semestre = AnoSemestre.objects.filter(curso=curso).latest("ano", "semestre")
+            dias_semana = DiasSemana.objects.filter(id__in=dias_ids)
+
+            # Definir períodos relevantes com base no nome do semestre
+            if ultimo_ano_semestre.semestre.nome == 'primeiro_semestre':
+                # Apenas períodos pares
+                periodos_relevantes = [i for i in range(1, curso.quantidade_periodos + 1) if i % 2 == 0]
+            else:
+                # Apenas períodos ímpares
+                periodos_relevantes = [i for i in range(1, curso.quantidade_periodos + 1) if i % 2 != 0]
+
+            # Criação dos horários no padrão especificado
+            for periodo_num in periodos_relevantes:
+                for dia in dias_semana:
+                    # Verificar se o horário já existe para o dia, período e ano/semestre atuais
+                    if not HorariosDisciplinas.objects.filter(
+                        horario_curso=novo_horario,
+                        dia_semana=dia,
+                        periodo=periodo_num,
+                        ano_semestre=ultimo_ano_semestre,
+                        curso=curso
+                    ).exists():
+                        HorariosDisciplinas.objects.create(
+                            horario_curso=novo_horario,
+                            ano_semestre=ultimo_ano_semestre,
+                            periodo=periodo_num,  # Salva o número do período correspondente
+                            dia_semana=dia,
+                            curso=curso,
+                            disciplina=None  # Configuração inicial como "Sem disciplina"
+                        )
+
+            messages.success(request, 'Horários e quadro de horários adicionados com sucesso!')
+        except AnoSemestre.DoesNotExist:
+            messages.warning(request, "Nenhum quadro de horários recente foi encontrado. O horário foi criado, mas não foi associado a nenhum quadro.")
+
         return redirect('horarios_adicionar')
 
     dias = DiasSemana.objects.all()
     horarios_curso = HorarioCurso.objects.filter(curso=curso)
 
-    # Adiciona os dias da semana associados a cada horário em formato JSON
     for horario in horarios_curso:
         horario.dias_semana_json = json.dumps(list(horario.dias_semana.values_list('id', flat=True)))
 
@@ -84,7 +112,6 @@ def horarios_adicionar(request):
         'horarios_curso': horarios_curso,
         'curso': curso
     })
-
 @login_required
 def horarios_editar(request, horario_id):
     horario = get_object_or_404(HorarioCurso, id=horario_id)

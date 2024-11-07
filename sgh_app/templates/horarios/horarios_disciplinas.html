@@ -22,8 +22,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <!-- Botões alinhados ao lado do campo de pesquisa -->
-            <div class="col-md-3 d-flex  mt-2">
+            <div class="col-md-3 d-flex mt-2">
                 <button type="submit" class="btn btn-primary mr-2"><i class="fas fa-search"></i> Pesquisar</button>
                 <a href="{% url 'gerar_horarios' %}" class="btn btn-primary mr-2"><i class="fas fa-plus"></i> Gerar Horários</a>
                 <a href="{% url 'gerar_pdf' %}?ano={{ request.GET.ano }}&semestre={{ request.GET.semestre }}" class="btn btn-primary mr-2" title="Baixar Quadro de Horários em PDF"><i class="fas fa-download"></i></a>
@@ -74,47 +73,43 @@
                         {% for dia in dias_semana %}
                             <td class="align-middle">
                                 {% if dia in horario.horario_curso.dias_semana.all %}
-                                    {% with alocacao_encontrada=False %}
+                                    <div class="cell-content">
                                         {% for alocacao in horario.alocacoes_list %}
-                                            {% if alocacao.dia_semana == dia and alocacao.periodo == periodo.grouper %}
-                                                {% if alocacao.disciplina %}
-                                                    <div class="d-flex align-items-center">
-                                                        <strong class="mr-2">{{ alocacao.disciplina.nome }}</strong>
-                                                        <a href="#" onclick="removerAlocacao({{ alocacao.id }})" title="Remover Alocação">
-                                                            <i class="fa fa-trash text-red"></i>
-                                                        </a>
-                                                        <form id="remover-form-{{ alocacao.id }}" action="{% url 'remover_alocacao' alocacao.id %}" method="POST" style="display: none;">
-                                                            {% csrf_token %}
-                                                        </form>
-                                                    </div>
-                                                    {% if alocacao.disciplina.disciplina_professores.all %}
-                                                        <small class="text-muted">
-                                                            Professor(es): 
-                                                            {% for prof in alocacao.disciplina.disciplina_professores.all %}
-                                                                {{ prof.professor.nome }}{% if not forloop.last %}, {% endif %}
-                                                            {% endfor %}
-                                                        </small>
-                                                    {% endif %}
-                                                    {% with alocacao_encontrada=True %}
-                                                    {% endwith %}
+                                            {% if alocacao.dia_semana == dia and alocacao.periodo == periodo.grouper and alocacao.disciplina %}
+                                                <div class="d-flex align-items-center disciplina">
+                                                    <strong class="mr-2">{{ alocacao.disciplina.nome }}</strong>
+                                                    <a href="#" onclick="removerAlocacao({{ alocacao.id }})" title="Remover Alocação">
+                                                        <i class="fa fa-trash text-red"></i>
+                                                    </a>
+                                                    <form id="remover-form-{{ alocacao.id }}" action="{% url 'remover_alocacao' alocacao.id %}" method="POST" style="display: none;">
+                                                        {% csrf_token %}
+                                                    </form>
+                                                </div>
+                                                {% if alocacao.disciplina.disciplina_professores.all %}
+                                                    <small class="text-muted">
+                                                        Professor(es): 
+                                                        {% for prof in alocacao.disciplina.disciplina_professores.all %}
+                                                            {{ prof.professor.nome }}{% if not forloop.last %}, {% endif %}
+                                                        {% endfor %}
+                                                    </small>
                                                 {% endif %}
                                             {% endif %}
                                         {% endfor %}
-                                        {% if not alocacao_encontrada %}
+                                        <!-- Botão "Adicionar Disciplina" -->
                                         <div class="alocacao-actions">
-                                            <a href="{% url 'alocar_disciplina' horario.horario_curso.id dia.id periodo.grouper %}" class="btn btn-secondary btn-sm">
+                                            <a href="{% url 'alocar_disciplina' horario.horario_curso.id dia.id periodo.grouper %}" class="btn btn-secondary btn-sm add-disciplina-btn">
                                                 Adicionar Disciplina
                                             </a>
-                                            {% for preferencia in preferencias_professores %}
-                                                {% if dia in preferencia.dias_preferidos.all and horario.horario_curso in preferencia.horas_preferidas.all %}
-                                                    <span class="badge {% if preferencia.professor.centro != curso.centro %}badge-success{% else %}badge-danger{% endif %}" title="Preferência de {{ preferencia.professor.nome }}">
-                                                        <i class="fa fa-exclamation-circle"></i>
-                                                    </span>
-                                                {% endif %}
-                                            {% endfor %}
                                         </div>
-                                        {% endif %}
-                                    {% endwith %}
+                                        <!-- Preferências do professor -->
+                                        {% for preferencia in preferencias_professores %}
+                                            {% if dia in preferencia.dias_preferidos.all and horario.horario_curso in preferencia.horas_preferidas.all %}
+                                                <span class="badge {% if preferencia.professor.centro != curso.centro %}badge-success{% else %}badge-danger{% endif %}" title="Preferência de {{ preferencia.professor.nome }}">
+                                                    <i class="fa fa-exclamation-circle"></i>
+                                                </span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
                                 {% else %}
                                     <span class="text-muted">Sem Aula</span>
                                 {% endif %}
@@ -135,12 +130,12 @@
 
 <style>
     .custom-table thead {
-        background-color: #b0c4de; /* Azul mais escuro para o cabeçalho */
-        color: #ffffff; /* Texto branco no cabeçalho */
+        background-color: #b0c4de;
+        color: #ffffff;
     }
     
     .text-red {
-        color: #ff0000; /* Define o vermelho específico */
+        color: #ff0000;
     }
     
     .badge-info i.fa-exclamation-circle {
@@ -154,6 +149,22 @@
 </style>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Seleciona todas as células da tabela que têm conteúdo de disciplina
+        const cells = document.querySelectorAll('.cell-content');
+
+        cells.forEach(cell => {
+            // Verifica se há uma disciplina alocada (elemento com a classe 'disciplina')
+            const disciplinaAlocada = cell.querySelector('.disciplina');
+            const addButton = cell.querySelector('.add-disciplina-btn');
+
+            // Se houver uma disciplina alocada, remove apenas o botão de adicionar
+            if (disciplinaAlocada && addButton) {
+                addButton.remove();
+            }
+        });
+    });
+
     function removerAlocacao(id) {
         event.preventDefault();
         if (confirm("Tem certeza de que deseja remover esta alocação?")) {
